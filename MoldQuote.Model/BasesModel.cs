@@ -36,5 +36,7 @@ namespace MoldQuote.Model
         /// 顶针板
         /// </summary>
         public List<MoldBaseModel> EiectorPlates { get; set; } = new List<MoldBaseModel>();
+
+      
     }
 }

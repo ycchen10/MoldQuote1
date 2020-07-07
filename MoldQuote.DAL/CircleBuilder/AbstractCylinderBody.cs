@@ -39,6 +39,7 @@ namespace MoldQuote.DAL
                 return UMathUtils.GetDis(this.StratPt, this.EndPt);
             }
         }
+        public string Name { get; set; }
         public AbstractCylinderBody(StepBuilder builder)
         {
             this.Builder = builder;
