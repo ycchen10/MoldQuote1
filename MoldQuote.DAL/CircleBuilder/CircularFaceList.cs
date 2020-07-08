@@ -79,6 +79,12 @@ namespace MoldQuote.DAL
 
             return featers;
         }
+
+        public bool IsCylinder()
+        {
+            List<AbstractCircleFace> cyls = CircleFaceList.FindAll(a => a is CylinderFace).ToList();
+            return cyls.Count > 0;
+        }
         /// <summary>
         /// 排序
         /// </summary>

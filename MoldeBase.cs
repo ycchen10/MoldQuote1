@@ -39,6 +39,7 @@ using NXOpen;
 using NXOpen.BlockStyler;
 using MoldQuote.DAL;
 using MoldQuote.Model;
+using System.Collections.Generic;
 //------------------------------------------------------------------------------
 //Represents Block Styler application class
 //------------------------------------------------------------------------------
@@ -61,7 +62,10 @@ public class MoldeBase
     private NXOpen.BlockStyler.Button buttonOk;// Block type: Button
     private NXOpen.BlockStyler.Group group1;// Block type: Group
     private NXOpen.BlockStyler.Tree treeInfo;// Block type: Tree Control
-    
+    private AbstractMoldBaseName baseName = null;
+    private List<MoldQuote.Model.IDisplayObject> seleInfo = new List<MoldQuote.Model.IDisplayObject>();
+    private List<MoldQuoteNameInfo> infos = new List<MoldQuoteNameInfo>();
+
     //------------------------------------------------------------------------------
     //Constructor for NX Styler class
     //------------------------------------------------------------------------------
@@ -126,9 +130,9 @@ public class MoldeBase
         }
         finally
         {
-            if(theMoldeBase != null)
+            if (theMoldeBase != null)
                 theMoldeBase.Dispose();
-                theMoldeBase = null;
+            theMoldeBase = null;
         }
     }
     //------------------------------------------------------------------------------
@@ -148,13 +152,13 @@ public class MoldeBase
     // MUST NOT use this option since it will UNLOAD your NX Open application image
     // from the menubar.
     //------------------------------------------------------------------------------
-     public static int GetUnloadOption(string arg)
+    public static int GetUnloadOption(string arg)
     {
         //return System.Convert.ToInt32(Session.LibraryUnloadOption.Explicitly);
-         return System.Convert.ToInt32(Session.LibraryUnloadOption.Immediately);
+        return System.Convert.ToInt32(Session.LibraryUnloadOption.Immediately);
         // return System.Convert.ToInt32(Session.LibraryUnloadOption.AtTermination);
     }
-    
+
     //------------------------------------------------------------------------------
     // Following method cleanup any housekeeping chores that may be needed.
     // This method is automatically called by NX.
@@ -171,7 +175,7 @@ public class MoldeBase
             theUI.NXMessageBox.Show("Block Styler", NXMessageBox.DialogType.Error, ex.ToString());
         }
     }
-    
+
     //------------------------------------------------------------------------------
     //This method shows the dialog on the screen
     //------------------------------------------------------------------------------
@@ -188,23 +192,23 @@ public class MoldeBase
         }
         return 0;
     }
-    
+
     //------------------------------------------------------------------------------
     //Method Name: Dispose
     //------------------------------------------------------------------------------
     public void Dispose()
     {
-        if(theDialog != null)
+        if (theDialog != null)
         {
             theDialog.Dispose();
             theDialog = null;
         }
     }
-    
+
     //------------------------------------------------------------------------------
     //---------------------Block UI Styler Callback Functions--------------------------
     //------------------------------------------------------------------------------
-    
+
     //------------------------------------------------------------------------------
     //Callback Name: initialize_cb
     //------------------------------------------------------------------------------
@@ -228,55 +232,55 @@ public class MoldeBase
             //Registration of Treelist specific callbacks
             //------------------------------------------------------------------------------
             //treeInfo.SetOnExpandHandler(new NXOpen.BlockStyler.Tree.OnExpandCallback(OnExpandCallback));
-            
+
             //treeInfo.SetOnInsertColumnHandler(new NXOpen.BlockStyler.Tree.OnInsertColumnCallback(OnInsertColumnCallback));
-            
+
             //treeInfo.SetOnInsertNodeHandler(new NXOpen.BlockStyler.Tree.OnInsertNodeCallback(OnInsertNodecallback));
-            
+
             //treeInfo.SetOnDeleteNodeHandler(new NXOpen.BlockStyler.Tree.OnDeleteNodeCallback(OnDeleteNodecallback));
-            
+
             //treeInfo.SetOnPreSelectHandler(new NXOpen.BlockStyler.Tree.OnPreSelectCallback(OnPreSelectcallback));
-            
-            //treeInfo.SetOnSelectHandler(new NXOpen.BlockStyler.Tree.OnSelectCallback(OnSelectcallback));
-            
+
+            treeInfo.SetOnSelectHandler(new NXOpen.BlockStyler.Tree.OnSelectCallback(OnSelectcallback));
+
             //treeInfo.SetOnStateChangeHandler(new NXOpen.BlockStyler.Tree.OnStateChangeCallback(OnStateChangecallback));
-            
+
             //treeInfo.SetToolTipTextHandler(new NXOpen.BlockStyler.Tree.ToolTipTextCallback(ToolTipTextcallback));
-            
+
             //treeInfo.SetColumnSortHandler(new NXOpen.BlockStyler.Tree.ColumnSortCallback(ColumnSortcallback));
-            
+
             //treeInfo.SetStateIconNameHandler(new NXOpen.BlockStyler.Tree.StateIconNameCallback(StateIconNameCallback));
-            
+
             //treeInfo.SetOnBeginLabelEditHandler(new NXOpen.BlockStyler.Tree.OnBeginLabelEditCallback(OnBeginLabelEditCallback));
-            
+
             //treeInfo.SetOnEndLabelEditHandler(new NXOpen.BlockStyler.Tree.OnEndLabelEditCallback(OnEndLabelEditCallback));
-            
+
             //treeInfo.SetOnEditOptionSelectedHandler(new NXOpen.BlockStyler.Tree.OnEditOptionSelectedCallback(OnEditOptionSelectedCallback));
-            
+
             //treeInfo.SetAskEditControlHandler(new NXOpen.BlockStyler.Tree.AskEditControlCallback(AskEditControlCallback));
-            
+
             //treeInfo.SetOnMenuHandler(new NXOpen.BlockStyler.Tree.OnMenuCallback(OnMenuCallback));;
-            
+
             //treeInfo.SetOnMenuSelectionHandler(new NXOpen.BlockStyler.Tree.OnMenuSelectionCallback(OnMenuSelectionCallback));;
-            
+
             //treeInfo.SetIsDropAllowedHandler(new NXOpen.BlockStyler.Tree.IsDropAllowedCallback(IsDropAllowedCallback));;
-            
+
             //treeInfo.SetIsDragAllowedHandler(new NXOpen.BlockStyler.Tree.IsDragAllowedCallback(IsDragAllowedCallback));;
-            
+
             //treeInfo.SetOnDropHandler(new NXOpen.BlockStyler.Tree.OnDropCallback(OnDropCallback));;
-            
+
             //treeInfo.SetOnDropMenuHandler(new NXOpen.BlockStyler.Tree.OnDropMenuCallback(OnDropMenuCallback));
-            
+
             //treeInfo.SetOnDefaultActionHandler(new NXOpen.BlockStyler.Tree.OnDefaultActionCallback(OnDefaultActionCallback));
-            
+
             //------------------------------------------------------------------------------
             //------------------------------------------------------------------------------
             //Registration of ListBox specific callbacks
             //------------------------------------------------------------------------------
             //listBoxType.SetAddHandler(new NXOpen.BlockStyler.ListBox.AddCallback(AddCallback));
-            
+
             //listBoxType.SetDeleteHandler(new NXOpen.BlockStyler.ListBox.DeleteCallback(DeleteCallback));
-            
+
             //------------------------------------------------------------------------------
         }
         catch (Exception ex)
@@ -285,7 +289,7 @@ public class MoldeBase
             theUI.NXMessageBox.Show("Block Styler", NXMessageBox.DialogType.Error, ex.ToString());
         }
     }
-    
+
     //------------------------------------------------------------------------------
     //Callback Name: dialogShown_cb
     //This callback is executed just before the dialog launch. Thus any value set 
@@ -296,6 +300,7 @@ public class MoldeBase
         try
         {
             //---- Enter your callback code here -----
+            SetTreeTitle();
         }
         catch (Exception ex)
         {
@@ -303,7 +308,7 @@ public class MoldeBase
             theUI.NXMessageBox.Show("Block Styler", NXMessageBox.DialogType.Error, ex.ToString());
         }
     }
-    
+
     //------------------------------------------------------------------------------
     //Callback Name: apply_cb
     //------------------------------------------------------------------------------
@@ -314,7 +319,7 @@ public class MoldeBase
         {
             //---- Enter your callback code here -----
             Body aBody = bodySelectA.GetSelectedObjects()[0] as Body;
-            Body bBody = bodySelectB.GetSelectedObjects()[0] as Body;         
+            Body bBody = bodySelectB.GetSelectedObjects()[0] as Body;
         }
         catch (Exception ex)
         {
@@ -324,41 +329,46 @@ public class MoldeBase
         }
         return errorCode;
     }
-    
+
     //------------------------------------------------------------------------------
     //Callback Name: update_cb
     //------------------------------------------------------------------------------
-    public int update_cb( NXOpen.BlockStyler.UIBlock block)
+    public int update_cb(NXOpen.BlockStyler.UIBlock block)
     {
         try
         {
-            if(block == listBoxType)
+            if (block == listBoxType)
             {
-            //---------Enter your code here-----------
+                //---------Enter your code here-----------
             }
-            else if(block == png)
+            else if (block == png)
             {
-            //---------Enter your code here-----------
+                //---------Enter your code here-----------
             }
-            else if(block == bodySelectA)
+            else if (block == bodySelectA)
             {
-            //---------Enter your code here-----------
+                //---------Enter your code here-----------
             }
-            else if(block == label0)
+            else if (block == label0)
             {
-            //---------Enter your code here-----------
+                //---------Enter your code here-----------
             }
-            else if(block == bodySelectB)
+            else if (block == bodySelectB)
             {
-            //---------Enter your code here-----------
+                //---------Enter your code here-----------
             }
-            else if(block == label01)
+            else if (block == label01)
             {
-            //---------Enter your code here-----------
+                //---------Enter your code here-----------
             }
-            else if(block == buttonOk)
+            else if (block == buttonOk)
             {
-            //---------Enter your code here-----------
+                //---------Enter your code here-----------
+                Body aBody = bodySelectA.GetSelectedObjects()[0] as Body;
+                Body bBody = bodySelectB.GetSelectedObjects()[0] as Body;
+                AnalysisMold ana = new AnalysisMold(aBody, bBody);
+                baseName = new PinPointGateSystem(ana);
+                SetTreeInfo();
             }
         }
         catch (Exception ex)
@@ -368,7 +378,7 @@ public class MoldeBase
         }
         return 0;
     }
-    
+
     //------------------------------------------------------------------------------
     //Callback Name: ok_cb
     //------------------------------------------------------------------------------
@@ -394,107 +404,126 @@ public class MoldeBase
     //public void OnExpandCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node)
     //{
     //}
-    
+
     //public void OnInsertColumnCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
     //{
     //}
-    
+
     //public void OnInsertNodecallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node)
     //{
     //}
-    
+
     //public void OnDeleteNodecallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node)
     //{
     //}
-    
+
     //public void OnPreSelectcallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID, bool Selected)
     //{
     //}
-    
-    //public void OnSelectcallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID, bool Selected)
-    //{
-    //}
-    
+
+    public void OnSelectcallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID, bool Selected)
+    {
+        Part workPart = theSession.Parts.Work;
+        foreach (Body by in workPart.Bodies)
+        {
+            by.Blank();
+        }
+        if (this.seleInfo.Count != 0)
+        {
+            foreach (MoldQuote.Model.IDisplayObject mn in this.seleInfo)
+            {
+                mn.Highlight(false);
+            }
+            this.seleInfo.Clear();
+        }
+        foreach (Node nd in tree.GetSelectedNodes())
+        {
+            MoldQuote.Model.IDisplayObject mn = FindNameInfo(nd);
+            this.seleInfo.Add(mn);
+            mn.Highlight(true);
+        }
+    }
+
     //public void OnStateChangecallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int State)
     //{
     //}
-    
+
     //public string ToolTipTextcallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
     //{
     //}
-    
+
     //public int ColumnSortcallback(NXOpen.BlockStyler.Tree tree, int columnID, NXOpen.BlockStyler.Node node1, NXOpen.BlockStyler.Node node2)
     //{
     //}
-    
+
     //public string StateIconNameCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int state)
     //{
     //}
-    
+
     //public Tree.BeginLabelEditState OnBeginLabelEditCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
     //{
     //}
-    
+
     //public Tree.EndLabelEditState OnEndLabelEditCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID, string editedText)
     //{
     //}
-    
+
     //public Tree.EditControlOption OnEditOptionSelectedCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID, int selectedOptionID, string selectedOptionText, Tree.ControlType type)
     //{
     //}
-    
+
     //public Tree.ControlType AskEditControlCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
     //{
     //}
-    
+
     //public void OnMenuCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
     //{
     //}
-    
+
     //public void OnMenuSelectionCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int menuItemID)
     //{
     //}
-    
+
     //public Node.DropType IsDropAllowedCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID, NXOpen.BlockStyler.Node targetNode, int targetColumnID)
     //{
     //}
-    
+
     //public Node.DragType IsDragAllowedCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
     //{
     //}
-    
+
     //public bool OnDropCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node[] node, int columnID, NXOpen.BlockStyler.Node targetNode, int targetColumnID, Node.DropType dropType, int dropMenuItemId)
     //{
     //}
-    
+
     //public void OnDropMenuCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID, NXOpen.BlockStyler.Node targetNode, int targetColumnID)
     //{
     //}
-    
+
     //public void OnDefaultActionCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
     //{
     //}
-    
+
     //------------------------------------------------------------------------------
     //ListBox specific callbacks
     //------------------------------------------------------------------------------
     //public int  AddCallback (NXOpen.BlockStyler.ListBox list_box)
     //{
     //}
-    
+
     //public int  DeleteCallback(NXOpen.BlockStyler.ListBox list_box)
     //{
     //}
-    
+
     //------------------------------------------------------------------------------
-    
+
     //------------------------------------------------------------------------------
     //Function Name: GetBlockProperties
     //Returns the propertylist of the specified BlockID
     //------------------------------------------------------------------------------
     public PropertyList GetBlockProperties(string blockID)
     {
-        PropertyList plist =null;
+        PropertyList plist = null;
         try
         {
             plist = theDialog.GetBlockProperties(blockID);
@@ -506,5 +535,45 @@ public class MoldeBase
         }
         return plist;
     }
-    
+
+    public void SetTreeTitle()
+    {
+        this.treeInfo.InsertColumn(0, "名称", 100);
+        this.treeInfo.InsertColumn(1, "材料", 100);
+        this.treeInfo.InsertColumn(2, "长度", 60);
+        this.treeInfo.InsertColumn(3, "宽度", 60);
+        this.treeInfo.InsertColumn(4, "高度", 60);
+        this.treeInfo.InsertColumn(5, "数量", 60);
+    }
+
+    public void SetTreeInfo()
+    {
+        if (this.baseName != null)
+        {
+            infos.AddRange(this.baseName.GetBaseInfo());
+            foreach (MoldQuoteNameInfo info in infos)
+            {
+                Node pNode = this.treeInfo.CreateNode(info.Name);
+                this.treeInfo.InsertNode(pNode, null, null, Tree.NodeInsertOption.Last);
+                info.Node = pNode;
+                pNode.SetColumnDisplayText(0, info.Name);
+                pNode.SetColumnDisplayText(1, info.Materials);
+                pNode.SetColumnDisplayText(2, info.Length);
+                pNode.SetColumnDisplayText(3, info.Width);
+                pNode.SetColumnDisplayText(4, info.Height);
+                pNode.SetColumnDisplayText(5, "1");
+            }
+        }
+    }
+
+    public MoldQuote.Model.IDisplayObject FindNameInfo(Node node)
+    {
+        foreach (MoldQuoteNameInfo mm in infos)
+        {
+            if (mm.Node.Equals(node))
+                return mm;
+        }
+        return null;
+    }
+
 }

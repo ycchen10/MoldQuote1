@@ -32,19 +32,19 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="NXOpen">
-      <HintPath>..\..\..\Managed\NXOpen.dll</HintPath>
+      <HintPath>..\..\Managed\NXOpen.dll</HintPath>
     </Reference>
     <Reference Include="NXOpen.Guide">
-      <HintPath>..\..\..\Managed\NXOpen.Guide.dll</HintPath>
+      <HintPath>..\..\Managed\NXOpen.Guide.dll</HintPath>
     </Reference>
     <Reference Include="NXOpen.UF">
-      <HintPath>..\..\..\Managed\NXOpen.UF.dll</HintPath>
+      <HintPath>..\..\Managed\NXOpen.UF.dll</HintPath>
     </Reference>
     <Reference Include="NXOpen.Utilities">
-      <HintPath>..\..\..\Managed\NXOpen.Utilities.dll</HintPath>
+      <HintPath>..\..\Managed\NXOpen.Utilities.dll</HintPath>
     </Reference>
     <Reference Include="NXOpenUI">
-      <HintPath>..\..\..\Managed\NXOpenUI.dll</HintPath>
+      <HintPath>..\..\Managed\NXOpenUI.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

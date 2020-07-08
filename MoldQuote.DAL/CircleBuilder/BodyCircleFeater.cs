@@ -38,7 +38,8 @@ namespace MoldQuote.DAL
                 List<CircularFaceList> hole = CircularCollection.GetHoleList(this.circleFaces);
                 foreach (CircularFaceList cl in hole)
                 {
-                    holeBuilders.Add(new HoleBuilder(cl));
+                    if (cl.IsCylinder())
+                        holeBuilders.Add(new HoleBuilder(cl));
                 }
             }
         }
@@ -54,7 +55,8 @@ namespace MoldQuote.DAL
                 List<CircularFaceList> step = CircularCollection.GetStepList(this.circleFaces);
                 foreach (CircularFaceList cl in step)
                 {
-                    steps.Add(new StepBuilder(cl));
+                    if (cl.IsCylinder())
+                        steps.Add(new StepBuilder(cl));
                 }
             }
         }

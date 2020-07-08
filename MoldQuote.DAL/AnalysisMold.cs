@@ -16,7 +16,7 @@ namespace MoldQuote.DAL
     {
         private Body aBody;
         private Body bBody;
-        private Matrix4 matr = new Matrix4();
+        public Matrix4 Matr { get; private set; } = new Matrix4();
         private Part workPart;
         /// <summary>
         /// 上模
@@ -39,11 +39,11 @@ namespace MoldQuote.DAL
             this.aBody = aBody;
             this.bBody = bBody;
             workPart = Session.GetSession().Parts.Work;
-            this.matr = GetMatr();
-            MoldBaseModel aMold = new MoldBaseModel(aBody, matr);
+            this.Matr = GetMatr();
+            MoldBaseModel aMold = new MoldBaseModel(aBody, Matr);
             aMold.Name = "A板";
             this.AMoldBase = aMold;
-            MoldBaseModel bMold = new MoldBaseModel(bBody, matr);
+            MoldBaseModel bMold = new MoldBaseModel(bBody, Matr);
             bMold.Name = "B板";
             this.BMoldBase = bMold;
         }
@@ -53,7 +53,7 @@ namespace MoldQuote.DAL
             CoordinateSystem wcs = workPart.WCS.CoordinateSystem;
             Matrix4 mat = new Matrix4();
             mat.Identity();
-            mat.TransformToCsys(wcs, ref matr);
+            mat.TransformToCsys(wcs, ref mat);
             Matrix4 inv = mat.GetInversMatrix();
             MoldBaseModel aMold = new MoldBaseModel(aBody, mat);
             MoldBaseModel bMold = new MoldBaseModel(bBody, mat);
@@ -73,7 +73,7 @@ namespace MoldQuote.DAL
             cylinder = new List<AbstractCylinderBody>();
             foreach (Body by in workPart.Bodies)
             {
-                MoldBaseModel mm = new MoldBaseModel(by, this.matr);
+                MoldBaseModel mm = new MoldBaseModel(by, this.Matr);
                 if (UMathUtils.IsEqual(mm.CenterPt.X, 0) && UMathUtils.IsEqual(mm.CenterPt.Y, 0))
                 {
                     moldBase.Add(mm);
@@ -88,7 +88,7 @@ namespace MoldQuote.DAL
 
                         if (ab != null)
                         {
-                            double angle = UMathUtils.Angle(ab.Direction, this.matr.GetZAxis());
+                            double angle = UMathUtils.Angle(ab.Direction, this.Matr.GetZAxis());
                             if (UMathUtils.IsEqual(angle, 0) || UMathUtils.IsEqual(angle, Math.PI))
                                 cylinder.Add(ab);
                         }
@@ -197,6 +197,7 @@ namespace MoldQuote.DAL
             {
                 if (!(UMathUtils.IsEqual(mm.CenterPt.X, 0) && UMathUtils.IsEqual(mm.CenterPt.Y, 0)))
                 {
+                    mm.Name = "方铁";
                     spacer.Add(mm);
                 }
             }
@@ -210,32 +211,30 @@ namespace MoldQuote.DAL
         /// <returns></returns>
         public List<MoldBaseModel> GetEiectorPlates(List<MoldBaseModel> molds, List<MoldBaseModel> spacer)
         {
-            double minZ = spacer[0].CenterPt.Z - spacer[0].DisPt.Z;
-            double maxZ = spacer[0].CenterPt.Z + spacer[0].DisPt.Z;
-            List<MoldBaseModel> moldBases = molds.FindAll(a => a.CenterPt.Z > minZ && a.CenterPt.Z < maxZ).ToList();
+            double minZ = Math.Round(spacer[0].CenterPt.Z - spacer[0].DisPt.Z, 3);
+            double maxZ = Math.Round(spacer[0].CenterPt.Z + spacer[0].DisPt.Z, 3);
+            List<MoldBaseModel> moldBases = molds.FindAll(a => Math.Round(a.CenterPt.Z - a.DisPt.Z, 3) > minZ && Math.Round(a.CenterPt.Z + a.DisPt.Z, 3) < maxZ).ToList();
+            //List<MoldBaseModel> moldBases = new List<MoldBaseModel>();
+            //foreach (MoldBaseModel mm in molds)
+            //{
+            //    if (Math.Round(mm.CenterPt.Z, 3) > minZ && Math.Round(mm.CenterPt.Z, 3) < maxZ)
+            //        moldBases.Add(mm);
+            //}
+
             List<MoldBaseModel> eiector = new List<MoldBaseModel>();
             if (spacer[0].DisPt.X > spacer[0].DisPt.Y)
             {
-                double max = 0;
-                foreach (MoldBaseModel mm in moldBases)
-                {
-                    if (mm.DisPt.X > max)
-                        max = mm.DisPt.X;
-                }
+                double max = moldBases.Max(a => a.DisPt.X);
                 eiector = moldBases.FindAll(a => a.DisPt.X == max).ToList();
             }
             else
             {
-                double max = 0;
-                foreach (MoldBaseModel mm in moldBases)
-                {
-                    if (mm.DisPt.Y > max)
-                        max = mm.DisPt.Y;
-                }
+                double max = moldBases.Max(a => a.DisPt.Y);
                 eiector = moldBases.FindAll(a => a.DisPt.X == max).ToList();
             }
             return eiector;
         }
+
         /// <summary>
         ///获取推板
         /// </summary>
