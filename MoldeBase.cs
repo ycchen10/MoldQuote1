@@ -65,6 +65,7 @@ public class MoldeBase
     private AbstractMoldBaseName baseName = null;
     private List<MoldQuote.Model.IDisplayObject> seleInfo = new List<MoldQuote.Model.IDisplayObject>();
     private List<MoldQuoteNameInfo> infos = new List<MoldQuoteNameInfo>();
+    private List<StandardPartsName> standard = new List<StandardPartsName>();
 
     //------------------------------------------------------------------------------
     //Constructor for NX Styler class
@@ -551,6 +552,7 @@ public class MoldeBase
         if (this.baseName != null)
         {
             infos.AddRange(this.baseName.GetBaseInfo());
+            standard.AddRange(this.baseName.GetBolt());
             foreach (MoldQuoteNameInfo info in infos)
             {
                 Node pNode = this.treeInfo.CreateNode(info.Name);
@@ -562,6 +564,18 @@ public class MoldeBase
                 pNode.SetColumnDisplayText(3, info.Width);
                 pNode.SetColumnDisplayText(4, info.Height);
                 pNode.SetColumnDisplayText(5, "1");
+            }
+            foreach(StandardPartsName st in standard)
+            {
+                Node pNode = this.treeInfo.CreateNode(st.Name);
+                this.treeInfo.InsertNode(pNode, null, null, Tree.NodeInsertOption.Last);
+                st.Node = pNode;
+                pNode.SetColumnDisplayText(0, st.Name);
+                pNode.SetColumnDisplayText(1, "");
+                pNode.SetColumnDisplayText(2, "");
+                pNode.SetColumnDisplayText(3, "");
+                pNode.SetColumnDisplayText(4, "");
+                pNode.SetColumnDisplayText(5, st.Count.ToString());
             }
         }
     }

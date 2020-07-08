@@ -56,7 +56,7 @@ namespace MoldQuote.DAL
             }
             foreach (FaceLoopUtils.LoopList lt in loopList)
             {
-                if (lt.Type == 2 && lt.EdgeList.Length == 5)
+                if (lt.Type == 2 && lt.EdgeList.Length == 6)
                 {
                     return true;
                 }

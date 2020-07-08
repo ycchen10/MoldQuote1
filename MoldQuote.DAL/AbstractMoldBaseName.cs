@@ -74,36 +74,44 @@ namespace MoldQuote.DAL
         private void GetDowBaseModel()
         {
             List<MoldBaseModel> down = analysis.GetDownModel(this.moldbase);
-            if (UMathUtils.IsEqual(down[0].CenterPt.Z + down[0].DisPt.Z, this.BMoldBase.CenterPt.Z - this.BMoldBase.DisPt.Z))
+            if (down.Count > 0)
             {
-                this.SupportPlate = down[0];
-                this.SupportPlate.Name = "托板";
-            }
-            this.Baseplate = down[down.Count - 1];
-            this.Baseplate.Name = "底板";
-            MoldBaseModel kon = this.analysis.GetKnockoutPlate(this.moldbase);
-            if (kon != null)
-            {
-                this.PushPlate = kon;
-                this.PushPlate.Name = "推板";
-            }
-            List<MoldBaseModel> spa = this.analysis.GetSpacer(down);
-            if (spa.Count > 0)
-            {
-                this.Spacer.AddRange(spa);
-                List<MoldBaseModel> eiec = this.analysis.GetEiectorPlates(this.moldbase, spa);
-                double max = eiec.Max(a => a.CenterPt.Z);
-                foreach (MoldBaseModel mm in eiec)
+                if (UMathUtils.IsEqual(down[0].CenterPt.Z + down[0].DisPt.Z, this.BMoldBase.CenterPt.Z - this.BMoldBase.DisPt.Z)
+                    &&UMathUtils.IsEqual( down[0].CenterPt.X,0)&&UMathUtils.IsEqual(down[0].CenterPt.Y,0))
                 {
-                    if (UMathUtils.IsEqual(mm.CenterPt.Z, max))
+                    this.SupportPlate = down[0];
+                    this.SupportPlate.Name = "托板";
+                }
+                this.Baseplate = down[down.Count - 1];
+                this.Baseplate.Name = "底板";
+                MoldBaseModel kon = this.analysis.GetKnockoutPlate(this.moldbase);
+                if (kon != null)
+                {
+                    this.PushPlate = kon;
+                    this.PushPlate.Name = "推板";
+                }
+                List<MoldBaseModel> spa = this.analysis.GetSpacer(down);
+                if (spa.Count > 0)
+                {
+                    this.Spacer.AddRange(spa);
+                    List<MoldBaseModel> eiec = this.analysis.GetEiectorPlates(this.moldbase, spa);
+                    if (eiec.Count != 0)
                     {
-                        mm.Name = "面针板";
-                        FaceEiectorPlates.Add(mm);
-                    }
-                    else
-                    {
-                        mm.Name = "底针板";
-                        DowEiectorPlates.Add(mm);
+
+                        double max = eiec.Max(a => a.CenterPt.Z);
+                        foreach (MoldBaseModel mm in eiec)
+                        {
+                            if (UMathUtils.IsEqual(mm.CenterPt.Z, max))
+                            {
+                                mm.Name = "面针板";
+                                FaceEiectorPlates.Add(mm);
+                            }
+                            else
+                            {
+                                mm.Name = "底针板";
+                                DowEiectorPlates.Add(mm);
+                            }
+                        }
                     }
                 }
             }
@@ -115,8 +123,49 @@ namespace MoldQuote.DAL
                 }
             }
         }
+        protected bool IsPassThrough(AbstractCylinderBody ab, MoldBaseModel start, MoldBaseModel end)
+        {
+            double anlge = UMathUtils.Angle(analysis.Matr.GetZAxis(), ab.Direction);
+            Point3d startPt = ab.StratPt;
+            Point3d endPt = ab.EndPt;
+            this.analysis.Matr.ApplyPos(ref startPt);
+            this.analysis.Matr.ApplyPos(ref endPt);
 
-      
+            if (UMathUtils.IsEqual(anlge, 0))
+            {
+                if (startPt.Z > start.CenterPt.Z - start.DisPt.Z && endPt.Z < end.CenterPt.Z + end.DisPt.Z)
+                    return true;
+            }
+            if (UMathUtils.IsEqual(anlge, Math.PI))
+            {
+                if (startPt.Z < start.CenterPt.Z + start.DisPt.Z && endPt.Z > end.CenterPt.Z - end.DisPt.Z)
+                    return true;
+            }
+            return false;
+        }
+
+        protected bool IsPassThrough(AbstractCylinderBody ab, double start, double end)
+        {
+            double anlge = UMathUtils.Angle(analysis.Matr.GetZAxis(), ab.Direction);
+            Point3d startPt = ab.StratPt;
+            Point3d endPt = ab.EndPt;
+            this.analysis.Matr.ApplyPos(ref startPt);
+            this.analysis.Matr.ApplyPos(ref endPt);
+
+            if (UMathUtils.IsEqual(anlge, 0))
+            {
+                if (startPt.Z > start && endPt.Z < end)
+                    return true;
+            }
+            if (UMathUtils.IsEqual(anlge, Math.PI))
+            {
+                if (startPt.Z < start && endPt.Z > end)
+                    return true;
+            }
+            return false;
+        }
+
+
         /// <summary>
         /// 获取模架
         /// </summary>
@@ -141,7 +190,25 @@ namespace MoldQuote.DAL
         /// 获取螺栓信息
         /// </summary>
         /// <returns></returns>
-        public abstract List<string> GetBolt();
+        public abstract List<StandardPartsName> GetBolt();
+
+        protected List<StandardPartsName> GetCyliderName(List<AbstractCylinderBody> cyl)
+        {
+            var temp = cyl.GroupBy(a => a.ToString());
+            List<StandardPartsName> st = new List<StandardPartsName>();
+            foreach (var item in temp)
+            {
+                StandardPartsName spn = new StandardPartsName();
+                spn.Count = item.Count();
+                spn.Name = item.First().Name;
+                foreach (AbstractCylinderBody cy in item)
+                {
+                   // spn.Bodys.Add(cy.Builder.CylFeater[0].Cylinder.Data.Face.GetBody());
+                }
+                st.Add(spn);
+            }
+            return st;
+        }
 
     }
 }

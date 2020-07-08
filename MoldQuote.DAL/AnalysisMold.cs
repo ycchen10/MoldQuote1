@@ -110,13 +110,12 @@ namespace MoldQuote.DAL
             List<MoldBaseModel> up = molds.FindAll(a => a.CenterPt.Z > 0);
 
             double maxZ = AMoldBase.CenterPt.Z + AMoldBase.DisPt.Z;
-            List<MoldBaseModel> mold = SeekUpMoldBaseModel(up, maxZ);
+            List<MoldBaseModel> mold = SeekUpMoldBaseModel(up, ref maxZ);
             List<MoldBaseModel> upModel = new List<MoldBaseModel>();
             while (mold.Count > 0)
             {
                 upModel.AddRange(mold);
-                maxZ = mold[0].CenterPt.Z + mold[0].DisPt.Z;
-                mold = SeekUpMoldBaseModel(molds, maxZ);
+                mold = SeekUpMoldBaseModel(molds, ref maxZ);
             }
             upModel.Sort(delegate (MoldBaseModel a, MoldBaseModel b
                 )
@@ -133,13 +132,12 @@ namespace MoldQuote.DAL
         {
             List<MoldBaseModel> down = molds.FindAll(a => a.CenterPt.Z < 0);
             double minZ = BMoldBase.CenterPt.Z - BMoldBase.DisPt.Z;
-            List<MoldBaseModel> mold = SeekDownMoldBaseModel(down, minZ);
+            List<MoldBaseModel> mold = SeekDownMoldBaseModel(down, ref minZ);
             List<MoldBaseModel> down1 = new List<MoldBaseModel>();
             while (mold.Count > 0)
             {
                 down1.AddRange(mold);
-                minZ = mold[0].CenterPt.Z - mold[0].DisPt.Z;
-                mold = SeekDownMoldBaseModel(molds, minZ);
+                mold = SeekDownMoldBaseModel(molds, ref minZ);
             }
             down1.Sort(delegate (MoldBaseModel a, MoldBaseModel b)
             {
@@ -153,7 +151,7 @@ namespace MoldQuote.DAL
         /// <param name="molds"></param>
         /// <param name="z"></param>
         /// <returns></returns>
-        private List<MoldBaseModel> SeekUpMoldBaseModel(List<MoldBaseModel> molds, double maxz)
+        private List<MoldBaseModel> SeekUpMoldBaseModel(List<MoldBaseModel> molds, ref double maxz)
         {
             List<MoldBaseModel> mb = new List<MoldBaseModel>();
             foreach (MoldBaseModel mm in molds)
@@ -164,6 +162,8 @@ namespace MoldQuote.DAL
                     mb.Add(mm);
                 }
             }
+            if (mb.Count > 0)
+                maxz = mb[0].CenterPt.Z + mb[0].DisPt.Z;
             return mb;
         }
         /// <summary>
@@ -172,17 +172,19 @@ namespace MoldQuote.DAL
         /// <param name="molds"></param>
         /// <param name="z"></param>
         /// <returns></returns>
-        private List<MoldBaseModel> SeekDownMoldBaseModel(List<MoldBaseModel> molds, double maxz)
+        private List<MoldBaseModel> SeekDownMoldBaseModel(List<MoldBaseModel> molds, ref double minz)
         {
             List<MoldBaseModel> mb = new List<MoldBaseModel>();
             foreach (MoldBaseModel mm in molds)
             {
                 double mmz = mm.CenterPt.Z + mm.DisPt.Z;
-                if (UMathUtils.IsEqual(maxz, mmz))
+                if (UMathUtils.IsEqual(minz, mmz))
                 {
                     mb.Add(mm);
                 }
             }
+            if (mb.Count > 0)
+                minz = mb[0].CenterPt.Z - mb[0].DisPt.Z;
             return mb;
         }
         /// <summary>
@@ -230,7 +232,7 @@ namespace MoldQuote.DAL
             else
             {
                 double max = moldBases.Max(a => a.DisPt.Y);
-                eiector = moldBases.FindAll(a => a.DisPt.X == max).ToList();
+                eiector = moldBases.FindAll(a => a.DisPt.Y == max).ToList();
             }
             return eiector;
         }
