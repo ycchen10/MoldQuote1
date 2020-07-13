@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NXOpen;
+using NXOpen.Utilities;
 using Basic;
 
 namespace MoldQuote.DAL
@@ -40,6 +41,16 @@ namespace MoldQuote.DAL
             }
         }
         public string Name { get; set; }
+
+        public Body Body
+        {
+            get
+            {
+                return this.Builder.CylFeater[0].CylinderFace[0].Data.Face.GetBody();
+            }
+        }
+
+        public abstract double Radius { get; }
         public AbstractCylinderBody(StepBuilder builder)
         {
             this.Builder = builder;
@@ -63,6 +74,31 @@ namespace MoldQuote.DAL
         public void Highlight(bool highlight)
         {
             this.Builder.Highlight(highlight);
+        }
+        /// <summary>
+        ///判断是否是导套
+        /// </summary>
+        /// <returns></returns>
+        public bool IsGuidePin()
+        {
+            Face face = this.Builder.CylFeater[0].CylinderFace[0].Data.Face;
+            FaceLoopUtils.LoopList[] loopList = FaceLoopUtils.AskFaceLoops(face.Tag);
+            if (loopList.Length != 2)
+            {
+                return false;
+            }
+            foreach (FaceLoopUtils.LoopList lt in loopList)
+            {
+                if (lt.Type == 2 && lt.EdgeList.Length == 1)
+                {
+                    Edge edge = NXObjectManager.Get(lt.EdgeList[0]) as Edge;
+                    if (edge.SolidEdgeType == Edge.EdgeType.Circular)
+
+                        return true;
+                }
+
+            }
+            return false;
         }
     }
 }

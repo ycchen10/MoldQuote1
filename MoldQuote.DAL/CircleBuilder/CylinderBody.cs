@@ -16,7 +16,7 @@ namespace MoldQuote.DAL
         /// <summary>
         /// 半径
         /// </summary>
-        public double Radius
+        public override double Radius
         {
             get { return Builder.CylFeater[0].Radius; }
         }

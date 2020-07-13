@@ -58,7 +58,7 @@
   <ItemGroup>
     <Compile Include="BasesModel.cs" />
     <Compile Include="IDisplayObject.cs" />
-    <Compile Include="MoldBaseModel.cs" />
+    <Compile Include="MoldBaseModel1.cs" />
     <Compile Include="MoldQuoteNameInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StandardPartsName.cs" />

@@ -77,13 +77,22 @@ namespace MoldQuote.DAL
             if (down.Count > 0)
             {
                 if (UMathUtils.IsEqual(down[0].CenterPt.Z + down[0].DisPt.Z, this.BMoldBase.CenterPt.Z - this.BMoldBase.DisPt.Z)
-                    &&UMathUtils.IsEqual( down[0].CenterPt.X,0)&&UMathUtils.IsEqual(down[0].CenterPt.Y,0))
+                    && UMathUtils.IsEqual(down[0].CenterPt.X, 0) && UMathUtils.IsEqual(down[0].CenterPt.Y, 0))
                 {
                     this.SupportPlate = down[0];
                     this.SupportPlate.Name = "托板";
                 }
-                this.Baseplate = down[down.Count - 1];
-                this.Baseplate.Name = "底板";
+                if (down[down.Count - 1].DisPt.Z * 2 > 10)
+                {
+                    this.Baseplate = down[down.Count - 1];
+                    this.Baseplate.Name = "底板";
+                }
+                else if (down.Count >= 2)
+                {
+                    this.Baseplate = down[down.Count - 2];
+                    this.Baseplate.Name = "底板";
+                }
+
                 MoldBaseModel kon = this.analysis.GetKnockoutPlate(this.moldbase);
                 if (kon != null)
                 {
@@ -133,12 +142,12 @@ namespace MoldQuote.DAL
 
             if (UMathUtils.IsEqual(anlge, 0))
             {
-                if (startPt.Z > start.CenterPt.Z - start.DisPt.Z && endPt.Z < end.CenterPt.Z + end.DisPt.Z)
+                if (startPt.Z > start.CenterPt.Z - start.DisPt.Z && endPt.Z < end.CenterPt.Z + end.DisPt.Z && startPt.Z < end.CenterPt.Z - end.DisPt.Z)
                     return true;
             }
             if (UMathUtils.IsEqual(anlge, Math.PI))
             {
-                if (startPt.Z < start.CenterPt.Z + start.DisPt.Z && endPt.Z > end.CenterPt.Z - end.DisPt.Z)
+                if (startPt.Z < start.CenterPt.Z + start.DisPt.Z && endPt.Z > end.CenterPt.Z - end.DisPt.Z && startPt.Z > end.CenterPt.Z + end.DisPt.Z)
                     return true;
             }
             return false;
@@ -191,7 +200,11 @@ namespace MoldQuote.DAL
         /// </summary>
         /// <returns></returns>
         public abstract List<StandardPartsName> GetBolt();
-
+        /// <summary>
+        /// 获取圆柱名称
+        /// </summary>
+        /// <param name="cyl"></param>
+        /// <returns></returns>
         protected List<StandardPartsName> GetCyliderName(List<AbstractCylinderBody> cyl)
         {
             var temp = cyl.GroupBy(a => a.ToString());
@@ -201,9 +214,11 @@ namespace MoldQuote.DAL
                 StandardPartsName spn = new StandardPartsName();
                 spn.Count = item.Count();
                 spn.Name = item.First().Name;
+                spn.Dia = Math.Ceiling(item.First().Radius * 2).ToString();
+                spn.Length = Math.Ceiling(item.First().Length).ToString();
                 foreach (AbstractCylinderBody cy in item)
                 {
-                   // spn.Bodys.Add(cy.Builder.CylFeater[0].Cylinder.Data.Face.GetBody());
+                    spn.Bodys.Add(cy.Body);
                 }
                 st.Add(spn);
             }

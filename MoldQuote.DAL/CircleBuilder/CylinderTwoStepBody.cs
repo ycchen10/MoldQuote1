@@ -17,7 +17,7 @@ namespace MoldQuote.DAL
         /// <summary>
         /// 半径
         /// </summary>
-        public double Radius
+        public override double Radius
         {
             get { return Builder.CylFeater[1].Radius; }
         }
@@ -64,24 +64,18 @@ namespace MoldQuote.DAL
             }
             return false;
         }
-        public bool IsGuidePin()
+       
+        /// <summary>
+        /// 判断是否是导柱
+        /// </summary>
+        /// <returns></returns>
+        public bool IsGuidePillar()
         {
             Face face = this.Builder.CylFeater[0].CylinderFace[0].Data.Face;
             FaceLoopUtils.LoopList[] loopList = FaceLoopUtils.AskFaceLoops(face.Tag);
-            if (loopList.Length != 2)
+            if (loopList.Length != 1 && loopList[0].Type == 1)
             {
-                return false;
-            }
-            foreach (FaceLoopUtils.LoopList lt in loopList)
-            {
-                if (lt.Type == 2 && lt.EdgeList.Length == 1)
-                {
-                    Edge edge = NXObjectManager.Get(lt.EdgeList[0]) as Edge;
-                    if (edge.SolidEdgeType == Edge.EdgeType.Circular)
-
-                        return true;
-                }
-
+                return true;
             }
             return false;
         }

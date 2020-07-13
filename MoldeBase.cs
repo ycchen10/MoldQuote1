@@ -37,6 +37,7 @@
 using System;
 using NXOpen;
 using NXOpen.BlockStyler;
+using NXOpen.Utilities;
 using MoldQuote.DAL;
 using MoldQuote.Model;
 using System.Collections.Generic;
@@ -258,11 +259,11 @@ public class MoldeBase
 
             //treeInfo.SetOnEditOptionSelectedHandler(new NXOpen.BlockStyler.Tree.OnEditOptionSelectedCallback(OnEditOptionSelectedCallback));
 
-            //treeInfo.SetAskEditControlHandler(new NXOpen.BlockStyler.Tree.AskEditControlCallback(AskEditControlCallback));
+            treeInfo.SetAskEditControlHandler(new NXOpen.BlockStyler.Tree.AskEditControlCallback(AskEditControlCallback));
 
-            //treeInfo.SetOnMenuHandler(new NXOpen.BlockStyler.Tree.OnMenuCallback(OnMenuCallback));;
+            treeInfo.SetOnMenuHandler(new NXOpen.BlockStyler.Tree.OnMenuCallback(OnMenuCallback)); ;
 
-            //treeInfo.SetOnMenuSelectionHandler(new NXOpen.BlockStyler.Tree.OnMenuSelectionCallback(OnMenuSelectionCallback));;
+            treeInfo.SetOnMenuSelectionHandler(new NXOpen.BlockStyler.Tree.OnMenuSelectionCallback(OnMenuSelectionCallback)); ;
 
             //treeInfo.SetIsDropAllowedHandler(new NXOpen.BlockStyler.Tree.IsDropAllowedCallback(IsDropAllowedCallback));;
 
@@ -319,8 +320,7 @@ public class MoldeBase
         try
         {
             //---- Enter your callback code here -----
-            Body aBody = bodySelectA.GetSelectedObjects()[0] as Body;
-            Body bBody = bodySelectB.GetSelectedObjects()[0] as Body;
+
         }
         catch (Exception ex)
         {
@@ -365,6 +365,9 @@ public class MoldeBase
             else if (block == buttonOk)
             {
                 //---------Enter your code here-----------
+                this.standard.Clear();
+                this.infos.Clear();
+                DeleteAllNode();
                 Body aBody = bodySelectA.GetSelectedObjects()[0] as Body;
                 Body bBody = bodySelectB.GetSelectedObjects()[0] as Body;
                 AnalysisMold ana = new AnalysisMold(aBody, bBody);
@@ -440,8 +443,12 @@ public class MoldeBase
         foreach (Node nd in tree.GetSelectedNodes())
         {
             MoldQuote.Model.IDisplayObject mn = FindNameInfo(nd);
-            this.seleInfo.Add(mn);
-            mn.Highlight(true);
+            if (mn != null)
+            {
+                this.seleInfo.Add(mn);
+                mn.Highlight(true);
+            }
+
         }
     }
 
@@ -473,17 +480,25 @@ public class MoldeBase
     //{
     //}
 
-    //public Tree.ControlType AskEditControlCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
-    //{
-    //}
+    public Tree.ControlType AskEditControlCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
+    {
+        string[] temp = { "A", "B", "C" };
+        this.treeInfo.SetEditOptions(temp, 0);
+        return Tree.ControlType.ComboBox;
+    }
 
-    //public void OnMenuCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
-    //{
-    //}
+    public void OnMenuCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
+    {
 
-    //public void OnMenuSelectionCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int menuItemID)
-    //{
-    //}
+        TreeListMenu eleMenu = this.treeInfo.CreateMenu();
+        eleMenu.AddMenuItem(1, "删除", "delete");
+        this.treeInfo.SetMenu(eleMenu);
+    }
+
+    public void OnMenuSelectionCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int menuItemID)
+    {
+        this.treeInfo.DeleteNode(node);
+    }
 
     //public Node.DropType IsDropAllowedCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID, NXOpen.BlockStyler.Node targetNode, int targetColumnID)
     //{
@@ -540,11 +555,13 @@ public class MoldeBase
     public void SetTreeTitle()
     {
         this.treeInfo.InsertColumn(0, "名称", 100);
-        this.treeInfo.InsertColumn(1, "材料", 100);
-        this.treeInfo.InsertColumn(2, "长度", 60);
-        this.treeInfo.InsertColumn(3, "宽度", 60);
-        this.treeInfo.InsertColumn(4, "高度", 60);
-        this.treeInfo.InsertColumn(5, "数量", 60);
+        this.treeInfo.InsertColumn(1, "材料", 50);
+        this.treeInfo.InsertColumn(2, "长度", 50);
+        this.treeInfo.InsertColumn(3, "宽度", 50);
+        this.treeInfo.InsertColumn(4, "高度", 50);
+        this.treeInfo.InsertColumn(5, "直径", 50);
+        this.treeInfo.InsertColumn(6, "长度", 50);
+        this.treeInfo.InsertColumn(7, "数量", 50);
     }
 
     public void SetTreeInfo()
@@ -552,7 +569,8 @@ public class MoldeBase
         if (this.baseName != null)
         {
             infos.AddRange(this.baseName.GetBaseInfo());
-            standard.AddRange(this.baseName.GetBolt());
+            List<StandardPartsName> bolt = this.baseName.GetBolt();
+            standard.AddRange(bolt);
             foreach (MoldQuoteNameInfo info in infos)
             {
                 Node pNode = this.treeInfo.CreateNode(info.Name);
@@ -563,9 +581,11 @@ public class MoldeBase
                 pNode.SetColumnDisplayText(2, info.Length);
                 pNode.SetColumnDisplayText(3, info.Width);
                 pNode.SetColumnDisplayText(4, info.Height);
-                pNode.SetColumnDisplayText(5, "1");
+                pNode.SetColumnDisplayText(5, "");
+                pNode.SetColumnDisplayText(6, "");
+                pNode.SetColumnDisplayText(7, "1");
             }
-            foreach(StandardPartsName st in standard)
+            foreach (StandardPartsName st in bolt)
             {
                 Node pNode = this.treeInfo.CreateNode(st.Name);
                 this.treeInfo.InsertNode(pNode, null, null, Tree.NodeInsertOption.Last);
@@ -575,11 +595,17 @@ public class MoldeBase
                 pNode.SetColumnDisplayText(2, "");
                 pNode.SetColumnDisplayText(3, "");
                 pNode.SetColumnDisplayText(4, "");
-                pNode.SetColumnDisplayText(5, st.Count.ToString());
+                pNode.SetColumnDisplayText(5, st.Dia);
+                pNode.SetColumnDisplayText(6, st.Length);
+                pNode.SetColumnDisplayText(7, st.Count.ToString());
             }
         }
     }
-
+    /// <summary>
+    /// 查找
+    /// </summary>
+    /// <param name="node"></param>
+    /// <returns></returns>
     public MoldQuote.Model.IDisplayObject FindNameInfo(Node node)
     {
         foreach (MoldQuoteNameInfo mm in infos)
@@ -587,7 +613,33 @@ public class MoldeBase
             if (mm.Node.Equals(node))
                 return mm;
         }
+        foreach (StandardPartsName sp in this.standard)
+        {
+            if (sp.Node.Equals(node))
+                return sp;
+        }
         return null;
     }
 
+    public void DeleteAllNode()
+    {
+        List<Node> pro = new List<Node>();
+        Node root = this.treeInfo.RootNode;
+        bool sibling = true;
+        while (sibling)
+        {
+            if (root != null)
+            {
+                pro.Add(root);
+                root = root.NextSiblingNode;
+            }
+            else
+                sibling = false;
+        }
+        foreach (Node nd in pro)
+        {
+            this.treeInfo.DeleteNode(nd);
+        }
+
+    }
 }

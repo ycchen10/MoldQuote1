@@ -9,7 +9,7 @@ using Basic;
 
 namespace MoldQuote.Model
 {
-    public class MoldBaseModel
+    public class MoldBaseModel1
     {
         private Matrix4 matr;
         public string Name { get; set; }
@@ -25,7 +25,7 @@ namespace MoldQuote.Model
         /// 材质
         /// </summary>
         public string Materials { get; set; }
-        public MoldBaseModel(Body body, Matrix4 mat)
+        public MoldBaseModel1(Body body, Matrix4 mat)
         {
             this.Body = body;
             this.matr = mat;

@@ -15,27 +15,27 @@ namespace MoldQuote.Model
         /// <summary>
         /// A板
         /// </summary>
-        public MoldBaseModel AMoldBase { get; set; }
+        public MoldBaseModel1 AMoldBase { get; set; }
         /// <summary>
         /// B板
         /// </summary>
-        public MoldBaseModel BMoldBase { get; set; }
+        public MoldBaseModel1 BMoldBase { get; set; }
         /// <summary>
         /// 上模板
         /// </summary>
-        public List<MoldBaseModel> UpModel { get; set; } = new List<MoldBaseModel>();
+        public List<MoldBaseModel1> UpModel { get; set; } = new List<MoldBaseModel1>();
         /// <summary>
         /// 下模板
         /// </summary>
-        public List<MoldBaseModel> DownModel { get; set; } = new List<MoldBaseModel>();
+        public List<MoldBaseModel1> DownModel { get; set; } = new List<MoldBaseModel1>();
         /// <summary>
         /// 垫脚
         /// </summary>
-        public List<MoldBaseModel> Spacer { get; set; } = new List<MoldBaseModel>();
+        public List<MoldBaseModel1> Spacer { get; set; } = new List<MoldBaseModel1>();
         /// <summary>
         /// 顶针板
         /// </summary>
-        public List<MoldBaseModel> EiectorPlates { get; set; } = new List<MoldBaseModel>();
+        public List<MoldBaseModel1> EiectorPlates { get; set; } = new List<MoldBaseModel1>();
 
       
     }

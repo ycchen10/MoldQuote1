@@ -81,6 +81,7 @@
     <Compile Include="Hole\StepHoleFeature.cs" />
     <Compile Include="Hole\StepThroughHoleFeature.cs" />
     <Compile Include="IDisplayObject.cs" />
+    <Compile Include="MoldBaseModel.cs" />
     <Compile Include="PinPointGateSystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

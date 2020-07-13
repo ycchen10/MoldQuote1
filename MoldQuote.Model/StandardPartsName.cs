@@ -21,7 +21,7 @@ namespace MoldQuote.Model
         public string Dia { get; set; }
 
         public int Count { get; set; }
-        public List<Body> Bodys { get; set; }
+        public List<Body> Bodys { get; set; } = new List<Body>();
 
         public Node Node { get; set; }
 
