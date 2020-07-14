@@ -259,7 +259,7 @@ public class MoldeBase
 
             //treeInfo.SetOnEditOptionSelectedHandler(new NXOpen.BlockStyler.Tree.OnEditOptionSelectedCallback(OnEditOptionSelectedCallback));
 
-            treeInfo.SetAskEditControlHandler(new NXOpen.BlockStyler.Tree.AskEditControlCallback(AskEditControlCallback));
+           // treeInfo.SetAskEditControlHandler(new NXOpen.BlockStyler.Tree.AskEditControlCallback(AskEditControlCallback));
 
             treeInfo.SetOnMenuHandler(new NXOpen.BlockStyler.Tree.OnMenuCallback(OnMenuCallback)); ;
 
@@ -480,12 +480,12 @@ public class MoldeBase
     //{
     //}
 
-    public Tree.ControlType AskEditControlCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
-    {
-        string[] temp = { "A", "B", "C" };
-        this.treeInfo.SetEditOptions(temp, 0);
-        return Tree.ControlType.ComboBox;
-    }
+    //public Tree.ControlType AskEditControlCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
+    //{
+    //    //string[] temp = { "A", "B", "C" };
+    //    //this.treeInfo.SetEditOptions(temp, 0);
+    //    return Tree.ControlType.ComboBox;
+    //}
 
     public void OnMenuCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
     {

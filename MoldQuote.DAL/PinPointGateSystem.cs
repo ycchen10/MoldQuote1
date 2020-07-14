@@ -125,21 +125,15 @@ namespace MoldQuote.DAL
             }
             if (this.Baseplate != null) //底板到B板
             {
-                bolt.AddRange(this.AMoldBase.GetBolt(cyls, this.Baseplate));
+                bolt.AddRange(this.BMoldBase.GetBolt(cyls, this.Baseplate));
             }
             if (upSp.Count > 0 && this.UpBaseplate != null) //上底板到上方铁
             {
-                foreach (MoldBaseModel mm in upSp)
-                {
-                    bolt.AddRange(mm.GetBolt(cyls, this.UpBaseplate));
-                }
+                bolt.AddRange(upSp[0].GetBolt(cyls, this.UpBaseplate));
             }
             if (dowSp.Count > 0 && this.Baseplate != null)//底板到下方铁
             {
-                foreach (MoldBaseModel mm in dowSp)
-                {
-                    bolt.AddRange(mm.GetBolt(cyls, this.Baseplate));
-                }
+                bolt.AddRange(dowSp[0].GetBolt(cyls, this.Baseplate));
             }
             if (up.Count > 0 && upFace.Count > 0)//上顶针板
             {
@@ -234,24 +228,27 @@ namespace MoldQuote.DAL
             List<MoldBaseModel> up = analysis.GetUpModel(this.moldbase);
             if (up.Count > 0)
             {
-                if (UMathUtils.IsEqual(up[0].CenterPt.Z - up[0].DisPt.Z, this.AMoldBase.CenterPt.Z + this.AMoldBase.DisPt.Z))
+                if (up[up.Count - 1].DisPt.Z <= 5 && up.Count != 1)
                 {
-                    this.ShuiSupportPlate = up[0];
-                    this.ShuiSupportPlate.Name = "水口推板";
+                    up.RemoveAt(up.Count - 1);
                 }
-                if (up.Count > 1)
+                if (up.Count == 1)
                 {
-                    if (up[up.Count - 1].DisPt.Z * 2 > 10)
-                    {
-                        this.UpBaseplate = up[up.Count - 2];
-                        this.UpBaseplate.Name = "水口板";
-                    }
-                    else if (up.Count >= 2)
-                    {
-                        this.UpBaseplate = up[up.Count - 2];
-                        this.UpBaseplate.Name = "水口板";
-                    }
+                    this.UpBaseplate = up[0];
+                    this.UpBaseplate.Name = "水口板";
                 }
+                else
+                {
+                    if (UMathUtils.IsEqual(up[0].CenterPt.Z - up[0].DisPt.Z, this.AMoldBase.CenterPt.Z + this.AMoldBase.DisPt.Z))
+                    {
+
+                        this.ShuiSupportPlate = up[0];
+                        this.ShuiSupportPlate.Name = "水口推板";
+                    }
+                    this.UpBaseplate = up[up.Count - 1];
+                    this.UpBaseplate.Name = "水口板";
+                }
+
 
 
                 List<MoldBaseModel> spa = this.analysis.GetSpacer(up);

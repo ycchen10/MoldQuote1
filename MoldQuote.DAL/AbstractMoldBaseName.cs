@@ -76,23 +76,18 @@ namespace MoldQuote.DAL
             List<MoldBaseModel> down = analysis.GetDownModel(this.moldbase);
             if (down.Count > 0)
             {
+                if (down[down.Count - 1].DisPt.Z * 2 <= 10 && down.Count != 1)
+                {
+                    down.RemoveAt(down.Count - 1);
+                }
                 if (UMathUtils.IsEqual(down[0].CenterPt.Z + down[0].DisPt.Z, this.BMoldBase.CenterPt.Z - this.BMoldBase.DisPt.Z)
                     && UMathUtils.IsEqual(down[0].CenterPt.X, 0) && UMathUtils.IsEqual(down[0].CenterPt.Y, 0))
                 {
                     this.SupportPlate = down[0];
                     this.SupportPlate.Name = "托板";
                 }
-                if (down[down.Count - 1].DisPt.Z * 2 > 10)
-                {
-                    this.Baseplate = down[down.Count - 1];
-                    this.Baseplate.Name = "底板";
-                }
-                else if (down.Count >= 2)
-                {
-                    this.Baseplate = down[down.Count - 2];
-                    this.Baseplate.Name = "底板";
-                }
-
+                this.Baseplate = down[down.Count - 1];
+                this.Baseplate.Name = "底板";
                 MoldBaseModel kon = this.analysis.GetKnockoutPlate(this.moldbase);
                 if (kon != null)
                 {
