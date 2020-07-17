@@ -94,7 +94,7 @@ namespace MoldQuote.DAL
                     this.PushPlate = kon;
                     this.PushPlate.Name = "推板";
                 }
-                List<MoldBaseModel> spa = this.analysis.GetSpacer(down);
+                List<MoldBaseModel> spa = this.analysis.GetSpacer(down); //方铁
                 if (spa.Count > 0)
                 {
                     this.Spacer.AddRange(spa);
@@ -119,7 +119,7 @@ namespace MoldQuote.DAL
                     }
                 }
             }
-            foreach (MoldBaseModel mm in down)
+            foreach (MoldBaseModel mm in down) //无名板
             {
                 if (mm.Name == null || mm.Name.Equals(""))
                 {
@@ -168,8 +168,6 @@ namespace MoldQuote.DAL
             }
             return false;
         }
-
-
         /// <summary>
         /// 获取模架
         /// </summary>
@@ -184,7 +182,7 @@ namespace MoldQuote.DAL
         /// 获取导套信息
         /// </summary>
         /// <returns></returns>
-        public abstract List<string> GetGuideBushing();
+        public abstract List<StandardPartsName> GetGuideBushing();
         /// <summary>
         /// 获取导柱信息
         /// </summary>
@@ -219,6 +217,7 @@ namespace MoldQuote.DAL
             }
             return st;
         }
+
 
     }
 }

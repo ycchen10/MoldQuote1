@@ -146,75 +146,67 @@ namespace MoldQuote.DAL
             return this.GetCyliderName(bolt);
         }
 
-        public override List<string> GetGuideBushing()
+        public override List<StandardPartsName> GetGuideBushing()
         {
             List<AbstractCylinderBody> pin = new List<AbstractCylinderBody>();
             List<AbstractCylinderBody> pins = this.cylinderBody.FindAll(a => a.IsGuidePin());
             List<MoldBaseModel> dowFace = this.FaceEiectorPlates.FindAll(a => a.CenterPt.Z < 0);
             List<MoldBaseModel> upFace = this.FaceEiectorPlates.FindAll(a => a.CenterPt.Z > 0);
-            List<MoldBaseModel> dow = this.DowEiectorPlates.FindAll(a => a.CenterPt.Z < 0);
-            List<MoldBaseModel> up = this.FaceEiectorPlates.FindAll(a => a.CenterPt.Z > 0);
-            foreach (AbstractCylinderBody ab in pins)
+            if (this.ShuiSupportPlate != null) // 水口托板
             {
-                if (ab.Radius >= 8)
+                foreach (AbstractCylinderBody ab in this.ShuiSupportPlate.GetGuideBushing(pins))
                 {
-                    ab.Name = "D" + Math.Ceiling(ab.Radius * 2).ToString();
-                    Point3d centerPt = UMathUtils.GetMiddle(ab.StratPt, ab.EndPt);
-                    Vector3d vec1 = ab.Direction;
-                    Vector3d vec2 = new Vector3d(-vec1.X, -vec1.Y, -vec1.Z);
-                    int count3 = TraceARay.AskTraceARay(this.AMoldBase.Body, ab.StratPt, vec1);
-                    int count4 = TraceARay.AskTraceARay(this.AMoldBase.Body, ab.StratPt, vec2);
-                    int count5 = TraceARay.AskTraceARay(this.BMoldBase.Body, ab.StratPt, vec1);
-                    int count6 = TraceARay.AskTraceARay(this.BMoldBase.Body, ab.StratPt, vec2);
-                    if (count3 == 0 && count4 == 0 && count5 == 0 && count6 == 0)
+                    Vector3d vec1 = this.analysis.Matr.GetZAxis();
+                    int count1 = TraceARay.AskTraceARay(this.AMoldBase.Body, ab.StratPt, new Vector3d(vec1.X, vec1.Y, -vec1.Z));
+                    int count2 = TraceARay.AskTraceARay(this.BMoldBase.Body, ab.StratPt, new Vector3d(vec1.X, vec1.Y, -vec1.Z));
+                    if (count1 == 0 && count2 == 0)
                     {
-                        List<Body> bodys = new List<Body>();
-                        NXOpen.GeometricAnalysis.SimpleInterference.Result res = AnalysisUtils.SetInterferenceOutResult(this.AMoldBase.Body, ab.Body, out bodys); //A板
-                        if (res == NXOpen.GeometricAnalysis.SimpleInterference.Result.OnlyEdgesOrFacesInterfere && bodys.Count == 0)
-                        {
-                            pin.Add(ab);
-                            continue;
-                        }
-                        res = AnalysisUtils.SetInterferenceOutResult(this.BMoldBase.Body, ab.Body, out bodys); //B板
-                        if (res == NXOpen.GeometricAnalysis.SimpleInterference.Result.OnlyEdgesOrFacesInterfere && bodys.Count == 0)
-                        {
-                            pin.Add(ab);
-                            continue;
-                        }
-                    }
-                    if (this.ShuiSupportPlate != null && centerPt.Z > this.ShuiSupportPlate.CenterPt.Z - this.ShuiSupportPlate.DisPt.Z &&
-                   centerPt.Z < this.ShuiSupportPlate.CenterPt.Z - this.ShuiSupportPlate.DisPt.Z) //推板上的导套
-                    {
-                        int count1 = TraceARay.AskTraceARay(this.ShuiSupportPlate.Body, ab.StratPt, vec1);
-                        int count2 = TraceARay.AskTraceARay(this.ShuiSupportPlate.Body, ab.StratPt, vec2);
-                        if (count1 == 0 && count2 == 0 && count3 == 0 && count4 == 0 && count5 == 0 && count6 == 0)
-                        {
-                            List<Body> bodys = new List<Body>();
-                            NXOpen.GeometricAnalysis.SimpleInterference.Result res = AnalysisUtils.SetInterferenceOutResult(this.ShuiSupportPlate.Body, ab.Body, out bodys);
-                            if (res == NXOpen.GeometricAnalysis.SimpleInterference.Result.OnlyEdgesOrFacesInterfere && bodys.Count == 0)
-                            {
-                                pin.Add(ab);
-                                continue;
-                            }
-
-                        }
-                    }
-
-                    if (up.Count > 0 && upFace.Count > 0)
-                    {
-                        if (centerPt.Z > upFace[0].CenterPt.Z - upFace[0].DisPt.Z && centerPt.Z < up[0].DisPt.Z + up[0].CenterPt.Z)
-                        {
-                            foreach (MoldBaseModel mm in up)
-                            {
-                                int count1 = TraceARay.AskTraceARay(this.ShuiSupportPlate.Body, ab.StratPt, vec1);
-                                int count2 = TraceARay.AskTraceARay(this.ShuiSupportPlate.Body, ab.StratPt, vec2);
-                            }
-                        }
+                        pin.Add(ab);
                     }
                 }
             }
-            return null;
+            foreach (AbstractCylinderBody ab in this.AMoldBase.GetGuideBushing(pins)) //A板
+            {
+                Vector3d vec1 = this.analysis.Matr.GetZAxis();
+                int count1 = TraceARay.AskTraceARay(this.BMoldBase.Body, ab.StratPt, new Vector3d(vec1.X, vec1.Y, -vec1.Z));
+                if (count1 == 0)
+                {
+                    pin.Add(ab);
+                }
+            }
+            if (this.PushPlate != null) //推板
+            {
+                foreach (AbstractCylinderBody ab in this.ShuiSupportPlate.GetGuideBushing(pins))
+                {
+                    Vector3d vec1 = this.analysis.Matr.GetZAxis();
+                    int count1 = TraceARay.AskTraceARay(this.AMoldBase.Body, ab.StratPt, vec1);
+                    int count2 = TraceARay.AskTraceARay(this.BMoldBase.Body, ab.StratPt, new Vector3d(vec1.X, vec1.Y, -vec1.Z));
+                    if (count1 == 0 && count2 == 0)
+                    {
+                        pin.Add(ab);
+                    }
+                }
+            }
+            foreach (AbstractCylinderBody ab in this.BMoldBase.GetGuideBushing(pins)) //B板
+            {
+                Vector3d vec1 = this.analysis.Matr.GetZAxis();
+                int count1 = TraceARay.AskTraceARay(this.AMoldBase.Body, ab.StratPt, vec1);
+                if (count1 == 0)
+                {
+                    pin.Add(ab);
+                }
+            }
+            foreach (MoldBaseModel mb in dowFace)
+            {
+                pin.AddRange(mb.GetGuideBushing(pins));
+            }
+            foreach (MoldBaseModel mb in upFace)
+            {
+                pin.AddRange(mb.GetGuideBushing(pins));
+            }
+            return GetCyliderName(pin);
         }
+
 
         public override List<string> GetGuidePillar()
         {
@@ -248,10 +240,7 @@ namespace MoldQuote.DAL
                     this.UpBaseplate = up[up.Count - 1];
                     this.UpBaseplate.Name = "水口板";
                 }
-
-
-
-                List<MoldBaseModel> spa = this.analysis.GetSpacer(up);
+                List<MoldBaseModel> spa = this.analysis.GetSpacer(up); //方铁
                 if (spa.Count > 0)
                 {
                     this.Spacer.AddRange(spa);
@@ -275,7 +264,7 @@ namespace MoldQuote.DAL
                     }
                 }
             }
-            foreach (MoldBaseModel mm in up)
+            foreach (MoldBaseModel mm in up) //无名板
             {
                 if (mm.Name == null || mm.Name.Equals(""))
                 {

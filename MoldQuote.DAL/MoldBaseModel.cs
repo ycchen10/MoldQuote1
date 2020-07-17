@@ -98,26 +98,29 @@ namespace MoldQuote.DAL
             List<AbstractCylinderBody> bush = new List<AbstractCylinderBody>();
             foreach (AbstractCylinderBody ab in cylinder)
             {
-                Vector3d vec1 = ab.Direction;
-                Vector3d vec2 = new Vector3d(-vec1.X, -vec1.Y, -vec1.Z);
-                int count1 = TraceARay.AskTraceARay(this.Body, ab.StratPt, vec1);
-                int count2 = TraceARay.AskTraceARay(this.Body, ab.StratPt, vec2);
-                if (count1 == 0 && count2 == 0)
+                if (ab.Radius >= 8)
                 {
-                    List<Body> bodys = new List<Body>();
-                    NXOpen.GeometricAnalysis.SimpleInterference.Result res = AnalysisUtils.SetInterferenceOutResult(this.Body, ab.Body, out bodys);
-                    if (res == NXOpen.GeometricAnalysis.SimpleInterference.Result.OnlyEdgesOrFacesInterfere && bodys.Count == 0)
+                    Vector3d vec1 = ab.Direction;
+                    Vector3d vec2 = new Vector3d(-vec1.X, -vec1.Y, -vec1.Z);
+                    int count1 = TraceARay.AskTraceARay(this.Body, ab.StratPt, vec1);
+                    int count2 = TraceARay.AskTraceARay(this.Body, ab.StratPt, vec2);
+                    if (count1 == 0 && count2 == 0)
                     {
-                        if (ab is CylinderBody)
+                        List<Body> bodys = new List<Body>();
+                        NXOpen.GeometricAnalysis.SimpleInterference.Result res = AnalysisUtils.SetInterferenceOutResult(this.Body, ab.Body, out bodys);
+                        if (res == NXOpen.GeometricAnalysis.SimpleInterference.Result.OnlyEdgesOrFacesInterfere && bodys.Count == 0)
                         {
-                            ab.Name = "直导套";
+                            if (ab is CylinderBody)
+                            {
+                                ab.Name = "直导套";
+                            }
+                            else
+                            {
+                                ab.Name = "有托导套";
+                            }
+                            bush.Add(ab);
+                            continue;
                         }
-                        else
-                        {
-                            ab.Name = "有托导套";
-                        }
-                        bush.Add(ab);
-                        continue;
                     }
                 }
             }
