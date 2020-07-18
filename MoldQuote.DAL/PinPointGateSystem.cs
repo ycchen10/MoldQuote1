@@ -121,34 +121,37 @@ namespace MoldQuote.DAL
 
             if (this.UpBaseplate != null)//上底板到A板
             {
-                bolt.AddRange(this.AMoldBase.GetBolt(cyls, this.UpBaseplate));
+                bolt.AddRange(this.UpBaseplate.GetBolt(cyls, this.AMoldBase));
             }
             if (this.Baseplate != null) //底板到B板
             {
-                bolt.AddRange(this.BMoldBase.GetBolt(cyls, this.Baseplate));
+                bolt.AddRange(this.Baseplate.GetBolt(cyls, this.BMoldBase));
             }
             if (upSp.Count > 0 && this.UpBaseplate != null) //上底板到上方铁
             {
-                bolt.AddRange(upSp[0].GetBolt(cyls, this.UpBaseplate));
+                bolt.AddRange(this.UpBaseplate.GetBolt(cyls, upSp[0]));
             }
             if (dowSp.Count > 0 && this.Baseplate != null)//底板到下方铁
             {
-                bolt.AddRange(dowSp[0].GetBolt(cyls, this.Baseplate));
+                bolt.AddRange(this.Baseplate.GetBolt(cyls, dowSp[0]));
+            }
+            if (this.SupportPlate != null && this.Baseplate != null)//底板到托板
+            {
+                bolt.AddRange(this.Baseplate.GetBolt(cyls, this.SupportPlate));
             }
             if (up.Count > 0 && upFace.Count > 0)//上顶针板
             {
-                bolt.AddRange(upFace[0].GetBolt(cyls, up[0]));
+                bolt.AddRange(up[0].GetBolt(cyls, upFace[0]));
             }
             if (dow.Count > 0 && dowFace.Count > 0)//下顶针板
             {
-                bolt.AddRange(dowFace[0].GetBolt(cyls, dow[0]));
+                bolt.AddRange(dow[0].GetBolt(cyls, dowFace[0]));
             }
             return this.GetCyliderName(bolt);
         }
 
         public override List<StandardPartsName> GetGuideBushing()
         {
-            List<AbstractCylinderBody> pin = new List<AbstractCylinderBody>();
             List<AbstractCylinderBody> pins = this.cylinderBody.FindAll(a => a.IsGuidePin());
             List<MoldBaseModel> dowFace = this.FaceEiectorPlates.FindAll(a => a.CenterPt.Z < 0);
             List<MoldBaseModel> upFace = this.FaceEiectorPlates.FindAll(a => a.CenterPt.Z > 0);
@@ -208,9 +211,65 @@ namespace MoldQuote.DAL
         }
 
 
-        public override List<string> GetGuidePillar()
+        public override List<StandardPartsName> GetGuidePillar()
         {
-            throw new NotImplementedException();
+            List<MoldBaseModel> dowFace = this.FaceEiectorPlates.FindAll(a => a.CenterPt.Z < 0);
+            List<MoldBaseModel> dow = this.DowEiectorPlates.FindAll(a => a.CenterPt.Z < 0);
+            List<AbstractCylinderBody> pillars = new List<AbstractCylinderBody>();
+            List<AbstractCylinderBody> pillar = this.cylinderBody.FindAll(a => a.Radius >= 8 && a is CylinderTwoStepBody && (a as CylinderTwoStepBody).IsGuidePillar());
+            foreach (AbstractCylinderBody ab in pin)
+            {
+                AbstractCylinderBody pi = pillar.Find(a => UMathUtils.IsEqual(a.StratPt.X, ab.StratPt.X) && UMathUtils.IsEqual(a.StratPt.Y, ab.StratPt.Y));
+                //if (!pillars.Exists(a => a.Equals(pi)))
+                //{
+                //    pillars.Add(pi);
+                //}
+                if (pi != null)
+                {
+                    pi.Name = "导柱";
+                    pillars.Add(pi);
+                    pillar.Remove(pi);
+                }
+            }
+            if (this.SupportPlate != null && dowFace.Count != 0 && dow.Count != 0)
+            {
+                foreach (AbstractCylinderBody ab in pillar)
+                {
+                    Point3d start = ab.StratPt;
+                    Point3d end = ab.EndPt;
+                    this.analysis.Matr.ApplyPos(ref start);
+                    this.analysis.Matr.ApplyPos(ref end);
+                    Vector3d vec = UMathUtils.GetVector(this.DowEiectorPlates[0].CenterPt, this.SupportPlate.CenterPt);
+                    if (UMathUtils.IsEqual(UMathUtils.Angle(vec, ab.Direction), 0) &&
+                       UMathUtils.IsEqual(ab.StratPt.Z, dow[0].CenterPt.Z + dow[0].DisPt.Z) &&
+                       ab.EndPt.Z > this.SupportPlate.CenterPt.Z - this.SupportPlate.DisPt.Z)
+                    {
+                        ab.Name = "回针";
+                        pillars.Add(ab);
+                    }
+
+                }
+            }
+            else if (this.SupportPlate == null && dowFace.Count != 0 && dow.Count != 0)
+            {
+                foreach (AbstractCylinderBody ab in pillar)
+                {
+                    Point3d start = ab.StratPt;
+                    Point3d end = ab.EndPt;
+                    this.analysis.Matr.ApplyPos(ref start);
+                    this.analysis.Matr.ApplyPos(ref end);
+                    Vector3d vec = UMathUtils.GetVector(this.DowEiectorPlates[0].CenterPt, this.SupportPlate.CenterPt);
+                    if (UMathUtils.IsEqual(UMathUtils.Angle(vec, ab.Direction), 0) &&
+                       UMathUtils.IsEqual(ab.StratPt.Z, dow[0].CenterPt.Z + dow[0].DisPt.Z) &&
+                       ab.EndPt.Z > this.BMoldBase.CenterPt.Z - this.BMoldBase.DisPt.Z)
+                    {
+                        ab.Name = "回针";
+                        pillars.Add(ab);
+                    }
+
+                }
+            }
+            return GetCyliderName(pillars);
         }
         /// <summary>
         /// 获取上模板

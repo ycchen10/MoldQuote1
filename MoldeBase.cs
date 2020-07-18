@@ -571,6 +571,8 @@ public class MoldeBase
             infos.AddRange(this.baseName.GetBaseInfo());
             List<StandardPartsName> bolt = this.baseName.GetBolt();
             standard.AddRange(bolt);
+            standard.AddRange(this.baseName.GetGuideBushing());
+            standard.AddRange(this.baseName.GetGuidePillar());
             foreach (MoldQuoteNameInfo info in infos)
             {
                 Node pNode = this.treeInfo.CreateNode(info.Name);
@@ -585,7 +587,7 @@ public class MoldeBase
                 pNode.SetColumnDisplayText(6, "");
                 pNode.SetColumnDisplayText(7, "1");
             }
-            foreach (StandardPartsName st in bolt)
+            foreach (StandardPartsName st in standard)
             {
                 Node pNode = this.treeInfo.CreateNode(st.Name);
                 this.treeInfo.InsertNode(pNode, null, null, Tree.NodeInsertOption.Last);

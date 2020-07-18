@@ -72,13 +72,17 @@ namespace MoldQuote.DAL
         /// <returns></returns>
         public List<AbstractCylinderBody> GetBolt(List<AbstractCylinderBody> cylinder, MoldBaseModel other)
         {
-            Vector3d vec = UMathUtils.GetVector(other.CenterPt, this.CenterPt);
+            Vector3d vec = UMathUtils.GetVector(new Point3d(0, 0, this.CenterPt.Z), new Point3d(0, 0, other.CenterPt.Z));
             List<AbstractCylinderBody> temp = cylinder.FindAll(a => UMathUtils.IsEqual(UMathUtils.Angle(vec, a.Direction), 0));
             List<AbstractCylinderBody> bolt = new List<AbstractCylinderBody>();
             foreach (AbstractCylinderBody ab in temp)
             {
-                if ((ab.StratPt.Z > other.CenterPt.Z - other.DisPt.Z && ab.StratPt.Z < other.CenterPt.Z + other.DisPt.Z)
-                    && (ab.EndPt.Z > this.CenterPt.Z - this.DisPt.Z && ab.EndPt.Z < this.CenterPt.Z + this.DisPt.Z))
+                Point3d start = ab.StratPt;
+                Point3d end = ab.EndPt;
+                this.matr.ApplyPos(ref start);
+                this.matr.ApplyPos(ref end);
+                if ((start.Z > this.CenterPt.Z - this.DisPt.Z && start.Z < this.CenterPt.Z + this.DisPt.Z)
+                    && (end.Z > other.CenterPt.Z - other.DisPt.Z && end.Z <= other.CenterPt.Z + other.DisPt.Z))
                 {
                     ab.Name = "M" + Math.Ceiling(ab.Radius * 2).ToString();
                     bolt.Add(ab);

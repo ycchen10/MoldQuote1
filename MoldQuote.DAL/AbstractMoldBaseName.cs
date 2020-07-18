@@ -64,6 +64,8 @@ namespace MoldQuote.DAL
         /// 其他无名板
         /// </summary>
         public List<MoldBaseModel> OtherBaseModel { get; protected set; } = new List<MoldBaseModel>();
+
+        protected List<AbstractCylinderBody> pin = new List<AbstractCylinderBody>();
         public AbstractMoldBaseName(AnalysisMold analysis)
         {
             this.analysis = analysis;
@@ -187,7 +189,7 @@ namespace MoldQuote.DAL
         /// 获取导柱信息
         /// </summary>
         /// <returns></returns>
-        public abstract List<string> GetGuidePillar();
+        public abstract List<StandardPartsName> GetGuidePillar();
         /// <summary>
         /// 获取螺栓信息
         /// </summary>
