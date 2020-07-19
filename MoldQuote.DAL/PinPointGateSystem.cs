@@ -216,7 +216,7 @@ namespace MoldQuote.DAL
             List<MoldBaseModel> dowFace = this.FaceEiectorPlates.FindAll(a => a.CenterPt.Z < 0);
             List<MoldBaseModel> dow = this.DowEiectorPlates.FindAll(a => a.CenterPt.Z < 0);
             List<AbstractCylinderBody> pillars = new List<AbstractCylinderBody>();
-            List<AbstractCylinderBody> pillar = this.cylinderBody.FindAll(a => a.Radius >= 8 && a is CylinderTwoStepBody && (a as CylinderTwoStepBody).IsGuidePillar());
+            List<AbstractCylinderBody> pillar = this.cylinderBody.FindAll(a => a.Radius >= 7 && a.IsGuidePillar());
             foreach (AbstractCylinderBody ab in pin)
             {
                 AbstractCylinderBody pi = pillar.Find(a => UMathUtils.IsEqual(a.StratPt.X, ab.StratPt.X) && UMathUtils.IsEqual(a.StratPt.Y, ab.StratPt.Y));
@@ -241,8 +241,8 @@ namespace MoldQuote.DAL
                     this.analysis.Matr.ApplyPos(ref end);
                     Vector3d vec = UMathUtils.GetVector(this.DowEiectorPlates[0].CenterPt, this.SupportPlate.CenterPt);
                     if (UMathUtils.IsEqual(UMathUtils.Angle(vec, ab.Direction), 0) &&
-                       UMathUtils.IsEqual(ab.StratPt.Z, dow[0].CenterPt.Z + dow[0].DisPt.Z) &&
-                       ab.EndPt.Z > this.SupportPlate.CenterPt.Z - this.SupportPlate.DisPt.Z)
+                       UMathUtils.IsEqual(start.Z, dow[0].CenterPt.Z + dow[0].DisPt.Z) &&
+                       end.Z > this.SupportPlate.CenterPt.Z - this.SupportPlate.DisPt.Z)
                     {
                         ab.Name = "回针";
                         pillars.Add(ab);
@@ -258,10 +258,10 @@ namespace MoldQuote.DAL
                     Point3d end = ab.EndPt;
                     this.analysis.Matr.ApplyPos(ref start);
                     this.analysis.Matr.ApplyPos(ref end);
-                    Vector3d vec = UMathUtils.GetVector(this.DowEiectorPlates[0].CenterPt, this.SupportPlate.CenterPt);
+                    Vector3d vec = UMathUtils.GetVector(this.DowEiectorPlates[0].CenterPt, this.BMoldBase.CenterPt);
                     if (UMathUtils.IsEqual(UMathUtils.Angle(vec, ab.Direction), 0) &&
-                       UMathUtils.IsEqual(ab.StratPt.Z, dow[0].CenterPt.Z + dow[0].DisPt.Z) &&
-                       ab.EndPt.Z > this.BMoldBase.CenterPt.Z - this.BMoldBase.DisPt.Z)
+                       UMathUtils.IsEqual(start.Z, dow[0].CenterPt.Z + dow[0].DisPt.Z) &&
+                       end.Z > this.BMoldBase.CenterPt.Z - this.BMoldBase.DisPt.Z)
                     {
                         ab.Name = "回针";
                         pillars.Add(ab);

@@ -65,19 +65,6 @@ namespace MoldQuote.DAL
             return false;
         }
        
-        /// <summary>
-        /// 判断是否是导柱
-        /// </summary>
-        /// <returns></returns>
-        public bool IsGuidePillar()
-        {
-            Face face = this.Builder.CylFeater[0].CylinderFace[0].Data.Face;
-            FaceLoopUtils.LoopList[] loopList = FaceLoopUtils.AskFaceLoops(face.Tag);
-            if (loopList.Length != 1 && loopList[0].Type == 1)
-            {
-                return true;
-            }
-            return false;
-        }
+      
     }
 }

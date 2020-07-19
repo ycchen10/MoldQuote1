@@ -20,7 +20,7 @@ namespace MoldQuote.DAL
         {
             this.List = cir;
             CylFeater = this.List.GetCylinderFeaters();
-            CylFeater.Sort();
+            CylFeater.Sort(); //以半径排序
         }
 
         /// <summary>
@@ -33,6 +33,22 @@ namespace MoldQuote.DAL
             {
                 cf.SetDirection(dir);
             }
+            CylinderFeaterSort(dir);
+        }
+        /// <summary>
+        /// 以向量排序
+        /// </summary>
+        /// <param name="dir"></param>
+        private void CylinderFeaterSort(Vector3d dir)
+        {           
+            this.CylFeater.Sort(delegate (CylinderFeater a, CylinderFeater b)
+            {
+                Point3d pt1 = UMathUtils.GetMiddle(a.StartPt, a.EndPt);
+                Point3d pt2 = UMathUtils.GetMiddle(b.StartPt, b.EndPt);
+                this.CylFeater[0].Cylinder.Matr.ApplyPos(ref pt1);
+                this.CylFeater[0].Cylinder.Matr.ApplyPos(ref pt2);
+                return pt1.Z.CompareTo(pt2.Z);
+            });
         }
         public void Highlight(bool highlight)
         {

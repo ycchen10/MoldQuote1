@@ -253,13 +253,13 @@ public class MoldeBase
 
             //treeInfo.SetStateIconNameHandler(new NXOpen.BlockStyler.Tree.StateIconNameCallback(StateIconNameCallback));
 
-            //treeInfo.SetOnBeginLabelEditHandler(new NXOpen.BlockStyler.Tree.OnBeginLabelEditCallback(OnBeginLabelEditCallback));
+            treeInfo.SetOnBeginLabelEditHandler(new NXOpen.BlockStyler.Tree.OnBeginLabelEditCallback(OnBeginLabelEditCallback));
 
-            //treeInfo.SetOnEndLabelEditHandler(new NXOpen.BlockStyler.Tree.OnEndLabelEditCallback(OnEndLabelEditCallback));
+            treeInfo.SetOnEndLabelEditHandler(new NXOpen.BlockStyler.Tree.OnEndLabelEditCallback(OnEndLabelEditCallback));
 
-            //treeInfo.SetOnEditOptionSelectedHandler(new NXOpen.BlockStyler.Tree.OnEditOptionSelectedCallback(OnEditOptionSelectedCallback));
+            treeInfo.SetOnEditOptionSelectedHandler(new NXOpen.BlockStyler.Tree.OnEditOptionSelectedCallback(OnEditOptionSelectedCallback));
 
-           // treeInfo.SetAskEditControlHandler(new NXOpen.BlockStyler.Tree.AskEditControlCallback(AskEditControlCallback));
+            treeInfo.SetAskEditControlHandler(new NXOpen.BlockStyler.Tree.AskEditControlCallback(AskEditControlCallback));
 
             treeInfo.SetOnMenuHandler(new NXOpen.BlockStyler.Tree.OnMenuCallback(OnMenuCallback)); ;
 
@@ -303,6 +303,10 @@ public class MoldeBase
         {
             //---- Enter your callback code here -----
             SetTreeTitle();
+            string[] item = { "大水口系统", "细水口系统" };
+            int[] sele = { 0 };
+            this.listBoxType.SetListItems(item);
+            this.listBoxType.SetSelectedItems(sele);
         }
         catch (Exception ex)
         {
@@ -371,7 +375,10 @@ public class MoldeBase
                 Body aBody = bodySelectA.GetSelectedObjects()[0] as Body;
                 Body bBody = bodySelectB.GetSelectedObjects()[0] as Body;
                 AnalysisMold ana = new AnalysisMold(aBody, bBody);
-                baseName = new PinPointGateSystem(ana);
+                if (this.listBoxType.GetSelectedItemStrings()[0].Equals("细水口系统"))
+                    baseName = new PinPointGateSystem(ana);
+                if (this.listBoxType.GetSelectedItemStrings()[0].Equals("大水口系统"))
+                    baseName = new EdgeGateSystem(ana);
                 SetTreeInfo();
             }
         }
@@ -468,24 +475,37 @@ public class MoldeBase
     //{
     //}
 
-    //public Tree.BeginLabelEditState OnBeginLabelEditCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
-    //{
-    //}
+    public Tree.BeginLabelEditState OnBeginLabelEditCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
+    {
+        return Tree.BeginLabelEditState.Allow;
+    }
 
-    //public Tree.EndLabelEditState OnEndLabelEditCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID, string editedText)
-    //{
-    //}
+    public Tree.EndLabelEditState OnEndLabelEditCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID, string editedText)
+    {
+        return Tree.EndLabelEditState.AcceptText;
+    }
 
-    //public Tree.EditControlOption OnEditOptionSelectedCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID, int selectedOptionID, string selectedOptionText, Tree.ControlType type)
-    //{
-    //}
+    public Tree.EditControlOption OnEditOptionSelectedCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID, int selectedOptionID, string selectedOptionText, Tree.ControlType type)
+    {
+        if(type==Tree.ControlType.ComboBox)
+        {
+            return Tree.EditControlOption.Accept;
+        }
+        return Tree.EditControlOption.Reject;
+    }
 
-    //public Tree.ControlType AskEditControlCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
-    //{
-    //    //string[] temp = { "A", "B", "C" };
-    //    //this.treeInfo.SetEditOptions(temp, 0);
-    //    return Tree.ControlType.ComboBox;
-    //}
+    public Tree.ControlType AskEditControlCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
+    {
+        if (columnID == 0)
+        {
+            string[] temp = { "A", "B", "C" };
+            this.treeInfo.SetEditOptions(temp, 0);
+            return Tree.ControlType.ComboBox;
+        }
+        return Tree.ControlType.None;
+
+
+    }
 
     public void OnMenuCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
     {
@@ -518,6 +538,7 @@ public class MoldeBase
 
     //public void OnDefaultActionCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
     //{
+    //    this.OnBeginLabelEditCallback(tree, node, columnID);
     //}
 
     //------------------------------------------------------------------------------
