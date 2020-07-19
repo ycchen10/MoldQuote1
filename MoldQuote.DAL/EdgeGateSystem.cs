@@ -10,15 +10,12 @@ using MoldQuote.Model;
 namespace MoldQuote.DAL
 {
     /// <summary>
-    /// 细水口模架
+    /// 大水口模架
     /// </summary>
-    public class PinPointGateSystem : AbstractMoldBaseName
+    public class EdgeGateSystem : AbstractMoldBaseName
     {
-        /// <summary>
-        /// 水口推板
-        /// </summary>
-        public MoldBaseModel ShuiSupportPlate { get; private set; }
-        public PinPointGateSystem(AnalysisMold mold) : base(mold)
+ 
+        public EdgeGateSystem(AnalysisMold mold) : base(mold)
         {
             GetUpBaseModel();
         }
@@ -27,9 +24,7 @@ namespace MoldQuote.DAL
         {
             List<MoldQuoteNameInfo> infos = new List<MoldQuoteNameInfo>();
             if (this.UpBaseplate != null)
-                infos.Add(this.UpBaseplate.GetMoldBaseInfo());
-            if (this.ShuiSupportPlate != null)
-                infos.Add(this.ShuiSupportPlate.GetMoldBaseInfo());
+                infos.Add(this.UpBaseplate.GetMoldBaseInfo());        
             if (this.AMoldBase != null)
                 infos.Add(this.AMoldBase.GetMoldBaseInfo());
             if (this.PushPlate != null)
@@ -58,56 +53,7 @@ namespace MoldQuote.DAL
             }
             return infos;
         }
-        /*
-                public override List<StandardPartsName> GetBolt()
-                {
-                    List<AbstractCylinderBody> bolt = new List<AbstractCylinderBody>();
-                    List<AbstractCylinderBody> cyls = this.cylinderBody.FindAll(a => a is CylinderTwoStepBody && (a as CylinderTwoStepBody).IsBolt());
-                    List<MoldBaseModel> dowSp = this.Spacer.FindAll(a => a.CenterPt.Z < 0);
-                    List<MoldBaseModel> upSp = this.Spacer.FindAll(a => a.CenterPt.Z > 0);
-                    List<MoldBaseModel> dowFace = this.FaceEiectorPlates.FindAll(a => a.CenterPt.Z < 0);
-                    List<MoldBaseModel> upFace = this.FaceEiectorPlates.FindAll(a => a.CenterPt.Z > 0);
-                    List<MoldBaseModel> dow = this.DowEiectorPlates.FindAll(a => a.CenterPt.Z < 0);
-                    List<MoldBaseModel> up = this.FaceEiectorPlates.FindAll(a => a.CenterPt.Z > 0);
-                    foreach (AbstractCylinderBody ab in cyls)
-                    {
-                        Point3d start = ab.StratPt;
-                        Point3d end = ab.EndPt;
-                        this.analysis.Matr.ApplyPos(ref start);
-                        this.analysis.Matr.ApplyPos(ref end);
-                        CylinderTwoStepBody cy = ab as CylinderTwoStepBody;
-                        cy.Name = "M" + Math.Ceiling(cy.Radius * 2).ToString();
-                        if (IsPassThrough(ab, this.ShuiSupportPlate, this.AMoldBase))//推板到A板
-                        {
-                            bolt.Add(cy);
-                        }
-                        if (IsPassThrough(ab, this.Baseplate, this.BMoldBase)) //底板到B板
-                        {
-                            bolt.Add(cy);
-                        }
-                        if (upSp.Count > 0 && IsPassThrough(ab, this.ShuiSupportPlate, upSp[0])) //推板到上方铁
-                        {
-                            bolt.Add(cy);
-                        }
-                        if (dowSp.Count > 0 && IsPassThrough(ab, this.Baseplate, dowSp[0]))//底板到下方铁
-                        {
-                            bolt.Add(cy);
-                        }
-                        if (up.Count > 0 && upFace.Count > 0 && IsPassThrough(ab, up[0], upFace[0]))//上顶针板
-                        {
-                            bolt.Add(cy);
-                        }
-                        if (dow.Count > 0 && dowFace.Count > 0 && IsPassThrough(ab, dow[0], dowFace[0]))//下顶针板
-                        {
-                            bolt.Add(cy);
-                        }
-                    }
-                    return this.GetCyliderName(bolt);
-
-
-
-                }
-        */
+      
         public override List<StandardPartsName> GetBolt()
         {
             List<AbstractCylinderBody> bolt = new List<AbstractCylinderBody>();
@@ -155,19 +101,7 @@ namespace MoldQuote.DAL
             List<AbstractCylinderBody> pins = this.cylinderBody.FindAll(a => a.IsGuidePin());
             List<MoldBaseModel> dowFace = this.FaceEiectorPlates.FindAll(a => a.CenterPt.Z < 0);
             List<MoldBaseModel> upFace = this.FaceEiectorPlates.FindAll(a => a.CenterPt.Z > 0);
-            if (this.ShuiSupportPlate != null) // 水口托板
-            {
-                foreach (AbstractCylinderBody ab in this.ShuiSupportPlate.GetGuideBushing(pins))
-                {
-                    Vector3d vec1 = this.analysis.Matr.GetZAxis();
-                    int count1 = TraceARay.AskTraceARay(this.AMoldBase.Body, ab.StratPt, new Vector3d(vec1.X, vec1.Y, -vec1.Z));
-                    int count2 = TraceARay.AskTraceARay(this.BMoldBase.Body, ab.StratPt, new Vector3d(vec1.X, vec1.Y, -vec1.Z));
-                    if (count1 == 0 && count2 == 0)
-                    {
-                        pin.Add(ab);
-                    }
-                }
-            }
+            
             foreach (AbstractCylinderBody ab in this.AMoldBase.GetGuideBushing(pins)) //A板
             {
                 Vector3d vec1 = this.analysis.Matr.GetZAxis();
@@ -177,19 +111,7 @@ namespace MoldQuote.DAL
                     pin.Add(ab);
                 }
             }
-            if (this.PushPlate != null) //推板
-            {
-                foreach (AbstractCylinderBody ab in this.ShuiSupportPlate.GetGuideBushing(pins))
-                {
-                    Vector3d vec1 = this.analysis.Matr.GetZAxis();
-                    int count1 = TraceARay.AskTraceARay(this.AMoldBase.Body, ab.StratPt, vec1);
-                    int count2 = TraceARay.AskTraceARay(this.BMoldBase.Body, ab.StratPt, new Vector3d(vec1.X, vec1.Y, -vec1.Z));
-                    if (count1 == 0 && count2 == 0)
-                    {
-                        pin.Add(ab);
-                    }
-                }
-            }
+            
             foreach (AbstractCylinderBody ab in this.BMoldBase.GetGuideBushing(pins)) //B板
             {
                 Vector3d vec1 = this.analysis.Matr.GetZAxis();
@@ -286,18 +208,12 @@ namespace MoldQuote.DAL
                 if (up.Count == 1)
                 {
                     this.UpBaseplate = up[0];
-                    this.UpBaseplate.Name = "水口板";
+                    this.UpBaseplate.Name = "工字板";
                 }
                 else
-                {
-                    if (UMathUtils.IsEqual(up[0].CenterPt.Z - up[0].DisPt.Z, this.AMoldBase.CenterPt.Z + this.AMoldBase.DisPt.Z))
-                    {
-
-                        this.ShuiSupportPlate = up[0];
-                        this.ShuiSupportPlate.Name = "水口推板";
-                    }
+                {                   
                     this.UpBaseplate = up[up.Count - 1];
-                    this.UpBaseplate.Name = "水口板";
+                    this.UpBaseplate.Name = "工字板";
                 }
                 List<MoldBaseModel> spa = this.analysis.GetSpacer(up); //方铁
                 if (spa.Count > 0)

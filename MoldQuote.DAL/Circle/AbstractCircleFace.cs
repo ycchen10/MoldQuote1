@@ -152,6 +152,7 @@ namespace MoldQuote.DAL
             else if (UMathUtils.IsEqual(angle, Math.PI))
             {
                 this.dir = dir;
+                this.matr.Identity();
                 this.matr.TransformToZAxis(this.CenterPt, dir);
                 Point3d temp = this.StartPt;
                 this.StartPt = this.EndPt;

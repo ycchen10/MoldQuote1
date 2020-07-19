@@ -12,17 +12,21 @@ namespace MoldQuote.DAL
     /// <summary>
     ///二台阶圆柱体类
     /// </summary>
-    public class CylinderTwoStepBody : AbstractCylinderBody
+    public class CylinderManyStepBody : AbstractCylinderBody
     {
         /// <summary>
         /// 半径
         /// </summary>
         public override double Radius
         {
-            get { return Builder.CylFeater[1].Radius; }
+            get
+            {
+                double length = this.Builder.CylFeater.Max(a => a.Length);
+                return this.Builder.CylFeater.Find(a => UMathUtils.IsEqual(a.Length, length)).Radius;
+            }
         }
 
-        public CylinderTwoStepBody(StepBuilder builder) : base(builder)
+        public CylinderManyStepBody(StepBuilder builder) : base(builder)
         {
 
         }
@@ -39,32 +43,10 @@ namespace MoldQuote.DAL
 
         protected override void GetStartAndEndPt()
         {
+            int count = this.Builder.CylFeater.Count;
             this.StratPt = this.Builder.CylFeater[0].StartPt;
-            this.EndPt = this.Builder.CylFeater[1].CylinderFace[this.Builder.CylFeater[1].CylinderFace.Count - 1].EndPt;
+            this.EndPt = this.Builder.CylFeater[count - 1].CylinderFace[this.Builder.CylFeater[count-1].CylinderFace.Count - 1].EndPt;
         }
-        /// <summary>
-        /// 判断是否是螺栓
-        /// </summary>
-        /// <returns></returns>
-        public bool IsBolt()
-        {
-            Face face = this.Builder.CylFeater[0].CylinderFace[0].Data.Face;
-            FaceLoopUtils.LoopList[] loopList = FaceLoopUtils.AskFaceLoops(face.Tag);
-            if (loopList.Length != 2)
-            {
-                return false;
-            }
-            foreach (FaceLoopUtils.LoopList lt in loopList)
-            {
-                if (lt.Type == 2 && lt.EdgeList.Length == 6)
-                {
-                    return true;
-                }
 
-            }
-            return false;
-        }
-       
-      
     }
 }

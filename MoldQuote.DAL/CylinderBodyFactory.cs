@@ -26,6 +26,7 @@ namespace MoldQuote.DAL
                     abs = new CylinderTwoStepBody(builder);
                     break;
                 default:
+                    abs = new CylinderManyStepBody(builder);
                     break;
             }
             return abs;

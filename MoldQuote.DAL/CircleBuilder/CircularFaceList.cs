@@ -73,6 +73,8 @@ namespace MoldQuote.DAL
 
                 foreach (CylinderFace cy in cyls)
                 {
+                    if (featers.Exists(a => a.CylinderFace.Exists(b => b.Data.Face.Equals(cy.Data.Face))))
+                        continue;
                     featers.Add(CylinderBuilder.GetCylinderFeater(this.CircleFaceList, cy));
                 }
             }
