@@ -69,6 +69,9 @@ namespace MoldQuote
         private NXOpen.BlockStyler.Button buttonOk;// Block type: Button
         private NXOpen.BlockStyler.Group group1;// Block type: Group
         private NXOpen.BlockStyler.Tree treeInfo;// Block type: Tree Control
+        private NXOpen.BlockStyler.Group group2;// Block type: Group
+        private NXOpen.BlockStyler.StringBlock strType;// Block type: String
+        private NXOpen.BlockStyler.MultilineString mulMessage;// Block type: Multiline String
         private AbstractMoldBaseName baseName = null;
         private List<MoldQuote.Model.IDisplayObject> seleInfo = new List<MoldQuote.Model.IDisplayObject>();
         private List<MoldQuoteNameInfo> infos = new List<MoldQuoteNameInfo>();
@@ -237,6 +240,9 @@ namespace MoldQuote
                 buttonOk = (NXOpen.BlockStyler.Button)theDialog.TopBlock.FindBlock("buttonOk");
                 group1 = (NXOpen.BlockStyler.Group)theDialog.TopBlock.FindBlock("group1");
                 treeInfo = (NXOpen.BlockStyler.Tree)theDialog.TopBlock.FindBlock("treeInfo");
+                group2 = (NXOpen.BlockStyler.Group)theDialog.TopBlock.FindBlock("group2");
+                strType = (NXOpen.BlockStyler.StringBlock)theDialog.TopBlock.FindBlock("strType");
+                mulMessage = (NXOpen.BlockStyler.MultilineString)theDialog.TopBlock.FindBlock("mulMessage");
                 //------------------------------------------------------------------------------
                 //Registration of Treelist specific callbacks
                 //------------------------------------------------------------------------------
@@ -315,6 +321,8 @@ namespace MoldQuote
                 this.listBoxType.SetListItems(item);
                 this.listBoxType.SetSelectedItems(sele);
                 string moldNamePath = dllPath.Replace("application\\", "Configure\\模架名称.dat");
+                string machNamePath = dllPath.Replace("application\\", "Configure\\加工信息.dat");
+                List<string> machName = new List<string>();
                 if (File.Exists(moldNamePath))
                 {
                     FileStream file = new FileStream(moldNamePath, FileMode.Open, FileAccess.Read);
@@ -328,6 +336,20 @@ namespace MoldQuote
                     read.Close();
                 }
                 SetImage();
+                if (File.Exists(machNamePath))
+                {
+                    FileStream file = new FileStream(machNamePath, FileMode.Open, FileAccess.Read);
+                    StreamReader read = new StreamReader(file, Encoding.UTF8);
+                    string strReadline;
+                    while ((strReadline = read.ReadLine()) != null)
+                    {
+                        machName.Add(strReadline);
+                    }
+                    file.Close();
+                    read.Close();
+                }
+                this.strType.SetListItems(machName.ToArray());
+                SetMaceMessge();
             }
             catch (Exception ex)
             {
@@ -345,22 +367,22 @@ namespace MoldQuote
             try
             {
                 //---- Enter your callback code here -----
-               Node root= treeInfo.RootNode;
-                if(root!=null)
+                Node root = treeInfo.RootNode;
+                if (root != null)
                 {
-                    CallProcessIpc.NxToErpQuote(root.GetColumnDisplayText(0), root.GetColumnDisplayText(1), root.GetColumnDisplayText(2),
-                        root.GetColumnDisplayText(3), root.GetColumnDisplayText(4), root.GetColumnDisplayText(5), root.GetColumnDisplayText(6),
-                        root.GetColumnDisplayText(7));
+                    this.GetAlter(root);
                     Node next = root.NextNode;
-                   while(next!=null)
+                    if (next != null)
+                        this.GetAlter(next);
+                    while (next != null)
                     {
-                        CallProcessIpc.NxToErpQuote(next.GetColumnDisplayText(0), next.GetColumnDisplayText(1), next.GetColumnDisplayText(2),
-                        next.GetColumnDisplayText(3), next.GetColumnDisplayText(4), next.GetColumnDisplayText(5), next.GetColumnDisplayText(6),
-                        next.GetColumnDisplayText(7));
                         next = next.NextNode;
+                        if (next != null)
+                            this.GetAlter(next);
                     }
-                        
+                    CallProcessIpc.NxToErpQuote(SendMessge());
                 }
+                
 
             }
             catch (Exception ex)
@@ -418,6 +440,15 @@ namespace MoldQuote
                     if (this.listBoxType.GetSelectedItemStrings()[0].Equals("大水口系统"))
                         baseName = new EdgeGateSystem(ana);
                     SetTreeInfo();
+                }
+                else if (block == strType)
+                {
+                    //---------Enter your code here-----------
+                    SetMaceMessge();
+                }
+                else if (block == mulMessage)
+                {
+                    //---------Enter your code here-----------
                 }
             }
             catch (Exception ex)
@@ -537,8 +568,9 @@ namespace MoldQuote
             if (columnID == 0)
             {
                 this.treeInfo.SetEditOptions(moldName.ToArray(), 0);
+                return Tree.ControlType.ComboBox;
             }
-            return Tree.ControlType.ListBox;
+            return Tree.ControlType.None;
 
 
         }
@@ -547,13 +579,18 @@ namespace MoldQuote
         {
 
             TreeListMenu eleMenu = this.treeInfo.CreateMenu();
-            eleMenu.AddMenuItem(1, "删除", "delete");
+            eleMenu.AddMenuItem(0, "删除", "delete");
             this.treeInfo.SetMenu(eleMenu);
         }
 
         public void OnMenuSelectionCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int menuItemID)
         {
-            this.treeInfo.DeleteNode(node);
+            if (menuItemID == 0)
+            {
+                DeleNode(node);
+                this.treeInfo.DeleteNode(node);
+            }
+
         }
 
         //public Node.DropType IsDropAllowedCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID, NXOpen.BlockStyler.Node targetNode, int targetColumnID)
@@ -680,6 +717,27 @@ namespace MoldQuote
             return null;
         }
 
+        public void DeleNode(Node node)
+        {
+            foreach (MoldQuoteNameInfo mm in infos)
+            {
+                if (mm.Node.Equals(node))
+                {
+                    infos.Remove(mm);
+                    return;
+                }
+
+            }
+            foreach (StandardPartsName sp in this.standard)
+            {
+                if (sp.Node.Equals(node))
+
+                {
+                    standard.Remove(sp);
+                    return;
+                }
+            }
+        }
         public void DeleteAllNode()
         {
             List<Node> pro = new List<Node>();
@@ -723,6 +781,80 @@ namespace MoldQuote
                 }
             }
 
+        }
+
+        private void SetMaceMessge()
+        {
+            string[] str = { this.strType.Value };
+            this.mulMessage.SetValue(str);
+        }
+
+        private void GetAlter(Node node)
+        {
+            foreach (MoldQuoteNameInfo mm in infos)
+            {
+                if (mm.Node.Equals(node))
+                {
+                    mm.Name = node.GetColumnDisplayText(0);
+                    mm.Length = node.GetColumnDisplayText(2);
+                    mm.Width = node.GetColumnDisplayText(3);
+                    mm.Height = node.GetColumnDisplayText(4);
+                    return;
+                }
+
+            }
+            foreach (StandardPartsName sp in this.standard)
+            {
+                if (sp.Node.Equals(node))
+
+                {
+                    sp.Name = node.GetColumnDisplayText(0);
+                    sp.Dia = node.GetColumnDisplayText(5);
+                    sp.Length = node.GetColumnDisplayText(6);
+                    int number = 0;
+                    bool result = Int32.TryParse(node.GetColumnDisplayText(7), out number);
+                    if (result)
+                        sp.Count = number;
+                    else
+                        sp.Count = 0;
+                    return;
+                }
+            }
+        }
+
+        private string SendMessge()
+        {
+            string dataString = "{C1,";
+            MoldQuoteNameInfo aInfo = this.infos.Find(a => a.Name.Equals("A板"));
+            MoldQuoteNameInfo bInfo = this.infos.Find(a => a.Name.Equals("B板"));
+            MoldQuoteNameInfo fangt = this.infos.Find(a => a.Name.Equals("方铁"));
+            string mach = this.mulMessage.GetValue()[0];
+            dataString += aInfo.Width + "," + aInfo.Length + "," + aInfo.Height + "," + bInfo.Height + ",";
+            if (fangt != null)
+            {
+                dataString += fangt.Height + ",";
+            }
+            else
+            {
+                dataString += "*,";
+            }
+            if (mach != null && mach != "")
+            {
+                dataString += mach + "}";
+            }
+            else
+            {
+                dataString += "*}";
+            }
+            foreach (MoldQuoteNameInfo mm in infos)
+            {
+                dataString += "1*" + mm.Name + "**" + mm.Height + "*" + mm.Width + "*" + mm.Length + "*" + "1,";
+            }
+            foreach (StandardPartsName sp in this.standard)
+            {
+                dataString += "0*" + sp.Name + "*" + sp.Dia + "***" + sp.Length + "*" + sp.Count.ToString() + ",";
+            }
+            return dataString;
         }
     }
 }

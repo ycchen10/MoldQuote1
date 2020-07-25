@@ -45,7 +45,7 @@ namespace Basic
             }
             finally
             {
-                theUfSession.Eval.Free(eval);
+              //  theUfSession.Eval.Free(eval);
             }
 
             return true;
@@ -84,7 +84,7 @@ namespace Basic
             }
             finally
             {
-                theUfSession.Eval.Free(eval);
+              //  theUfSession.Eval.Free(eval);
             }
         }
 
@@ -120,7 +120,7 @@ namespace Basic
             }
             finally
             {
-                theUfSession.Eval.Free(eval);
+              //  theUfSession.Eval.Free(eval);
             }
 
             return true;
@@ -147,7 +147,7 @@ namespace Basic
             }
             finally
             {
-                theUfSession.Eval.Free(eval);
+             //   theUfSession.Eval.Free(eval);
             }
         }
     }

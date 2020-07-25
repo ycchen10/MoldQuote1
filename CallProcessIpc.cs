@@ -14,6 +14,6 @@ namespace MoldQuote
         //调用非托管Dll，NxToErpQuote是CallProcessIpc.dll公开的函数名称
         [DllImport(_fileDll, EntryPoint = "NxToErpQuote", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
         //C#中的申明
-        public static extern Boolean NxToErpQuote(string ModelMClass, string ModelWidth, string ModelLength, string AThickness, string BThickness, string CThickness, string ContentData, string ProcessRemark);
+        public static extern Boolean NxToErpQuote(string MessageData );
     }
 }

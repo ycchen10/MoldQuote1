@@ -208,12 +208,12 @@ namespace MoldQuote.DAL
                 if (up.Count == 1)
                 {
                     this.UpBaseplate = up[0];
-                    this.UpBaseplate.Name = "工字板";
+                    this.UpBaseplate.Name = "面板";
                 }
                 else
                 {                   
                     this.UpBaseplate = up[up.Count - 1];
-                    this.UpBaseplate.Name = "工字板";
+                    this.UpBaseplate.Name = "面板";
                 }
                 List<MoldBaseModel> spa = this.analysis.GetSpacer(up); //方铁
                 if (spa.Count > 0)
