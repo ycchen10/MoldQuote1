@@ -265,6 +265,7 @@ namespace MoldQuote
 
                 //treeInfo.SetStateIconNameHandler(new NXOpen.BlockStyler.Tree.StateIconNameCallback(StateIconNameCallback));
 
+<<<<<<< HEAD
                 treeInfo.SetOnBeginLabelEditHandler(new NXOpen.BlockStyler.Tree.OnBeginLabelEditCallback(OnBeginLabelEditCallback));
 
                 treeInfo.SetOnEndLabelEditHandler(new NXOpen.BlockStyler.Tree.OnEndLabelEditCallback(OnEndLabelEditCallback));
@@ -272,6 +273,15 @@ namespace MoldQuote
                 treeInfo.SetOnEditOptionSelectedHandler(new NXOpen.BlockStyler.Tree.OnEditOptionSelectedCallback(OnEditOptionSelectedCallback));
 
                 treeInfo.SetAskEditControlHandler(new NXOpen.BlockStyler.Tree.AskEditControlCallback(AskEditControlCallback));
+=======
+            treeInfo.SetOnBeginLabelEditHandler(new NXOpen.BlockStyler.Tree.OnBeginLabelEditCallback(OnBeginLabelEditCallback));
+
+            treeInfo.SetOnEndLabelEditHandler(new NXOpen.BlockStyler.Tree.OnEndLabelEditCallback(OnEndLabelEditCallback));
+
+            treeInfo.SetOnEditOptionSelectedHandler(new NXOpen.BlockStyler.Tree.OnEditOptionSelectedCallback(OnEditOptionSelectedCallback));
+
+            treeInfo.SetAskEditControlHandler(new NXOpen.BlockStyler.Tree.AskEditControlCallback(AskEditControlCallback));
+>>>>>>> ec771fb6ee401cfa7a6ec5e5c62399e4fe1dd1e8
 
                 treeInfo.SetOnMenuHandler(new NXOpen.BlockStyler.Tree.OnMenuCallback(OnMenuCallback)); ;
 
@@ -311,6 +321,7 @@ namespace MoldQuote
         //------------------------------------------------------------------------------
         public void dialogShown_cb()
         {
+<<<<<<< HEAD
             try
             {
                 //---- Enter your callback code here -----
@@ -330,6 +341,19 @@ namespace MoldQuote
                 //---- Enter your exception handling code here -----
                 theUI.NXMessageBox.Show("Block Styler", NXMessageBox.DialogType.Error, ex.ToString());
             }
+=======
+            //---- Enter your callback code here -----
+            SetTreeTitle();
+            string[] item = { "大水口系统", "细水口系统" };
+            int[] sele = { 0 };
+            this.listBoxType.SetListItems(item);
+            this.listBoxType.SetSelectedItems(sele);
+        }
+        catch (Exception ex)
+        {
+            //---- Enter your exception handling code here -----
+            theUI.NXMessageBox.Show("Block Styler", NXMessageBox.DialogType.Error, ex.ToString());
+>>>>>>> ec771fb6ee401cfa7a6ec5e5c62399e4fe1dd1e8
         }
 
         //------------------------------------------------------------------------------
@@ -494,6 +518,7 @@ namespace MoldQuote
             }
             foreach (Node nd in tree.GetSelectedNodes())
             {
+<<<<<<< HEAD
                 MoldQuote.Model.IDisplayObject mn = FindNameInfo(nd);
                 if (mn != null)
                 {
@@ -501,6 +526,20 @@ namespace MoldQuote
                     mn.Highlight(true);
                 }
 
+=======
+                //---------Enter your code here-----------
+                this.standard.Clear();
+                this.infos.Clear();
+                DeleteAllNode();
+                Body aBody = bodySelectA.GetSelectedObjects()[0] as Body;
+                Body bBody = bodySelectB.GetSelectedObjects()[0] as Body;
+                AnalysisMold ana = new AnalysisMold(aBody, bBody);
+                if (this.listBoxType.GetSelectedItemStrings()[0].Equals("细水口系统"))
+                    baseName = new PinPointGateSystem(ana);
+                if (this.listBoxType.GetSelectedItemStrings()[0].Equals("大水口系统"))
+                    baseName = new EdgeGateSystem(ana);
+                SetTreeInfo();
+>>>>>>> ec771fb6ee401cfa7a6ec5e5c62399e4fe1dd1e8
             }
         }
 
@@ -549,6 +588,7 @@ namespace MoldQuote
             return Tree.ControlType.None;
 
 
+<<<<<<< HEAD
         }
 
         public void OnMenuCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
@@ -566,6 +606,55 @@ namespace MoldQuote
                 DeleNode(node);
                 this.treeInfo.DeleteNode(node);
             }
+=======
+    //public void OnStateChangecallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int State)
+    //{
+    //}
+
+    //public string ToolTipTextcallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
+    //{
+    //}
+
+    //public int ColumnSortcallback(NXOpen.BlockStyler.Tree tree, int columnID, NXOpen.BlockStyler.Node node1, NXOpen.BlockStyler.Node node2)
+    //{
+    //}
+
+    //public string StateIconNameCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int state)
+    //{
+    //}
+
+    public Tree.BeginLabelEditState OnBeginLabelEditCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
+    {
+        return Tree.BeginLabelEditState.Allow;
+    }
+
+    public Tree.EndLabelEditState OnEndLabelEditCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID, string editedText)
+    {
+        return Tree.EndLabelEditState.AcceptText;
+    }
+
+    public Tree.EditControlOption OnEditOptionSelectedCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID, int selectedOptionID, string selectedOptionText, Tree.ControlType type)
+    {
+        if(type==Tree.ControlType.ComboBox)
+        {
+            return Tree.EditControlOption.Accept;
+        }
+        return Tree.EditControlOption.Reject;
+    }
+
+    public Tree.ControlType AskEditControlCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
+    {
+        if (columnID == 0)
+        {
+            string[] temp = { "A", "B", "C" };
+            this.treeInfo.SetEditOptions(temp, 0);
+            return Tree.ControlType.ComboBox;
+        }
+        return Tree.ControlType.None;
+
+
+    }
+>>>>>>> ec771fb6ee401cfa7a6ec5e5c62399e4fe1dd1e8
 
         }
 
@@ -734,7 +823,14 @@ namespace MoldQuote
                 this.treeInfo.DeleteNode(nd);
             }
 
+<<<<<<< HEAD
         }
+=======
+    //public void OnDefaultActionCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
+    //{
+    //    this.OnBeginLabelEditCallback(tree, node, columnID);
+    //}
+>>>>>>> ec771fb6ee401cfa7a6ec5e5c62399e4fe1dd1e8
 
         private void SetImage()
         {
