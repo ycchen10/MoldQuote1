@@ -85,11 +85,7 @@ namespace MoldQuote.DAL
                     && (end.Z > other.CenterPt.Z - other.DisPt.Z && end.Z <= other.CenterPt.Z + other.DisPt.Z))
                 {
                     // ab.Name = "M" + Math.Ceiling(ab.Radius * 2).ToString();
-<<<<<<< HEAD
                     ab.Name = "螺丝";
-=======
-                    ab.Name = "螺栓";
->>>>>>> ec771fb6ee401cfa7a6ec5e5c62399e4fe1dd1e8
                     bolt.Add(ab);
                     continue;
                 }
