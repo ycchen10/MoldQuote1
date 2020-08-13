@@ -59,7 +59,7 @@ namespace MoldQuote
         private NXOpen.BlockStyler.BlockDialog theDialog;
         private NXOpen.BlockStyler.Group group;// Block type: Group
         private NXOpen.BlockStyler.ScrolledWindow scrolledWindow;// Block type: Scrolled Window
-        private NXOpen.BlockStyler.ListBox listBoxType;// Block type: List Box
+        private NXOpen.BlockStyler.StringBlock strType1;// Block type: String
         private NXOpen.BlockStyler.DrawingArea png;// Block type: Drawing Area
         private NXOpen.BlockStyler.ScrolledWindow scrolledWindow1;// Block type: Scrolled Window
         private NXOpen.BlockStyler.BodyCollector bodySelectA;// Block type: Body Collector
@@ -230,7 +230,7 @@ namespace MoldQuote
             {
                 group = (NXOpen.BlockStyler.Group)theDialog.TopBlock.FindBlock("group");
                 scrolledWindow = (NXOpen.BlockStyler.ScrolledWindow)theDialog.TopBlock.FindBlock("scrolledWindow");
-                listBoxType = (NXOpen.BlockStyler.ListBox)theDialog.TopBlock.FindBlock("listBoxType");
+                strType1 = (NXOpen.BlockStyler.StringBlock)theDialog.TopBlock.FindBlock("strType1");
                 png = (NXOpen.BlockStyler.DrawingArea)theDialog.TopBlock.FindBlock("png");
                 scrolledWindow1 = (NXOpen.BlockStyler.ScrolledWindow)theDialog.TopBlock.FindBlock("scrolledWindow1");
                 bodySelectA = (NXOpen.BlockStyler.BodyCollector)theDialog.TopBlock.FindBlock("bodySelectA");
@@ -243,7 +243,6 @@ namespace MoldQuote
                 group2 = (NXOpen.BlockStyler.Group)theDialog.TopBlock.FindBlock("group2");
                 strType = (NXOpen.BlockStyler.StringBlock)theDialog.TopBlock.FindBlock("strType");
                 mulMessage = (NXOpen.BlockStyler.MultilineString)theDialog.TopBlock.FindBlock("mulMessage");
-                //------------------------------------------------------------------------------
                 //Registration of Treelist specific callbacks
                 //------------------------------------------------------------------------------
                 //treeInfo.SetOnExpandHandler(new NXOpen.BlockStyler.Tree.OnExpandCallback(OnExpandCallback));
@@ -316,39 +315,14 @@ namespace MoldQuote
             {
                 //---- Enter your callback code here -----
                 SetTreeTitle();
-                string[] item = { "大水口系统", "细水口系统" };
-                int[] sele = { 0 };
-                this.listBoxType.SetListItems(item);
-                this.listBoxType.SetSelectedItems(sele);
                 string moldNamePath = dllPath.Replace("application\\", "Configure\\模架名称.dat");
                 string machNamePath = dllPath.Replace("application\\", "Configure\\加工信息.dat");
-                List<string> machName = new List<string>();
-                if (File.Exists(moldNamePath))
-                {
-                    FileStream file = new FileStream(moldNamePath, FileMode.Open, FileAccess.Read);
-                    StreamReader read = new StreamReader(file, Encoding.UTF8);
-                    string strReadline;
-                    while ((strReadline = read.ReadLine()) != null)
-                    {
-                        moldName.Add(strReadline);
-                    }
-                    file.Close();
-                    read.Close();
-                }
+                string typeath = dllPath.Replace("application\\", "Configure\\模胚花式.dat");
+                moldName.AddRange(GetBatFile(moldNamePath));
+               
+                this.strType.SetListItems(GetBatFile(machNamePath).ToArray());
+                this.strType1.SetListItems(GetBatFile(typeath).ToArray());
                 SetImage();
-                if (File.Exists(machNamePath))
-                {
-                    FileStream file = new FileStream(machNamePath, FileMode.Open, FileAccess.Read);
-                    StreamReader read = new StreamReader(file, Encoding.UTF8);
-                    string strReadline;
-                    while ((strReadline = read.ReadLine()) != null)
-                    {
-                        machName.Add(strReadline);
-                    }
-                    file.Close();
-                    read.Close();
-                }
-                this.strType.SetListItems(machName.ToArray());
                 SetMaceMessge();
             }
             catch (Exception ex)
@@ -382,7 +356,7 @@ namespace MoldQuote
                     }
                     CallProcessIpc.NxToErpQuote(SendMessge());
                 }
-                
+
 
             }
             catch (Exception ex)
@@ -401,7 +375,7 @@ namespace MoldQuote
         {
             try
             {
-                if (block == listBoxType)
+                if (block == strType1)
                 {
                     //---------Enter your code here-----------
                     SetImage();
@@ -435,9 +409,11 @@ namespace MoldQuote
                     Body aBody = bodySelectA.GetSelectedObjects()[0] as Body;
                     Body bBody = bodySelectB.GetSelectedObjects()[0] as Body;
                     AnalysisMold ana = new AnalysisMold(aBody, bBody);
-                    if (this.listBoxType.GetSelectedItemStrings()[0].Equals("细水口系统"))
+                    if (this.strType1.Value.Contains("细水口"))
                         baseName = new PinPointGateSystem(ana);
-                    if (this.listBoxType.GetSelectedItemStrings()[0].Equals("大水口系统"))
+                    if (this.strType1.Value.Contains("大水口"))
+                        baseName = new EdgeGateSystem(ana);
+                    else
                         baseName = new EdgeGateSystem(ana);
                     SetTreeInfo();
                 }
@@ -763,23 +739,18 @@ namespace MoldQuote
         private void SetImage()
         {
             string pngPath = dllPath.Replace("application\\", "Image\\");
-            if (this.listBoxType.GetSelectedItems()[0] == 0)
+            string type = this.strType1.Value;
+            if (type != null && type != "")
             {
-                if (File.Exists(pngPath + "大水口系统.bmp"))
+                string tmpe = pngPath + type.Substring(0, type.IndexOf("-")) + ".bmp";
+                if (File.Exists(tmpe))
                 {
-                    this.png.Image = pngPath + "大水口系统.bmp";
+                    this.png.Image = tmpe;
                     return;
                 }
 
             }
-            if (this.listBoxType.GetSelectedItems()[0] == 1)
-            {
-                if (File.Exists(pngPath + "细水口系统.bmp"))
-                {
-                    this.png.Image = pngPath + "细水口系统.bmp";
-                    return;
-                }
-            }
+
 
         }
 
@@ -824,7 +795,7 @@ namespace MoldQuote
 
         private string SendMessge()
         {
-            string dataString = "{C1,";
+            string dataString = "{"+ strType1.Value.Substring(0, strType1.Value.IndexOf("-"))+",";
             MoldQuoteNameInfo aInfo = this.infos.Find(a => a.Name.Equals("A板"));
             MoldQuoteNameInfo bInfo = this.infos.Find(a => a.Name.Equals("B板"));
             MoldQuoteNameInfo fangt = this.infos.Find(a => a.Name.Equals("方铁"));
@@ -855,6 +826,28 @@ namespace MoldQuote
                 dataString += "0*" + sp.Name + "*" + sp.Dia + "***" + sp.Length + "*" + sp.Count.ToString() + ",";
             }
             return dataString;
+        }
+        /// <summary>
+        /// 获取bat文件
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        private List<string> GetBatFile(string filePath)
+        {
+            List<string> info = new List<string>();
+            if (File.Exists(filePath))
+            {
+                FileStream file = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+                StreamReader read = new StreamReader(file, Encoding.UTF8);
+                string strReadline;
+                while ((strReadline = read.ReadLine()) != null)
+                {
+                    info.Add(strReadline);
+                }
+                file.Close();
+                read.Close();
+            }
+            return info;
         }
     }
 }
