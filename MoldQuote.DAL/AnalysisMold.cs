@@ -47,7 +47,10 @@ namespace MoldQuote.DAL
             bMold.Name = "B板";
             this.BMoldBase = bMold;
         }
-
+        /// <summary>
+        /// 根据AB板得到矩阵
+        /// </summary>
+        /// <returns></returns>
         private Matrix4 GetMatr()
         {
             CoordinateSystem wcs = workPart.WCS.CoordinateSystem;
@@ -74,7 +77,9 @@ namespace MoldQuote.DAL
             foreach (Body by in workPart.Bodies)
             {
                 MoldBaseModel mm = new MoldBaseModel(by, this.Matr);
-                if (UMathUtils.IsEqual(mm.CenterPt.X, 0) && UMathUtils.IsEqual(mm.CenterPt.Y, 0))
+                if ((UMathUtils.IsEqual(mm.CenterPt.X, 0) && UMathUtils.IsEqual(mm.CenterPt.Y, 0)) &&
+                    ((Math.Round(mm.DisPt.X, 4) >= Math.Round(AMoldBase.DisPt.X, 4) &&
+                    Math.Round(mm.DisPt.Y, 4) >= Math.Round(AMoldBase.DisPt.Y, 4))))
                 {
                     moldBase.Add(mm);
                 }
@@ -93,7 +98,9 @@ namespace MoldQuote.DAL
                                 cylinder.Add(ab);
                         }
                     }
-                    else if (UMathUtils.IsEqual(mm.CenterPt.X, 0) || UMathUtils.IsEqual(mm.CenterPt.Y, 0))
+                    else if ((UMathUtils.IsEqual(mm.CenterPt.X, 0) || UMathUtils.IsEqual(mm.CenterPt.Y, 0)) &&
+                        ((Math.Round(mm.DisPt.X, 4) >= Math.Round(AMoldBase.DisPt.X, 4) ||
+                         Math.Round(mm.DisPt.Y, 4) >= Math.Round(AMoldBase.DisPt.Y, 4))))
                     {
                         moldBase.Add(mm);
                     }
@@ -216,23 +223,19 @@ namespace MoldQuote.DAL
             double minZ = Math.Round(spacer[0].CenterPt.Z - spacer[0].DisPt.Z, 3);
             double maxZ = Math.Round(spacer[0].CenterPt.Z + spacer[0].DisPt.Z, 3);
             List<MoldBaseModel> moldBases = molds.FindAll(a => Math.Round(a.CenterPt.Z - a.DisPt.Z, 3) > minZ && Math.Round(a.CenterPt.Z + a.DisPt.Z, 3) < maxZ).ToList();
-            //List<MoldBaseModel> moldBases = new List<MoldBaseModel>();
-            //foreach (MoldBaseModel mm in molds)
-            //{
-            //    if (Math.Round(mm.CenterPt.Z, 3) > minZ && Math.Round(mm.CenterPt.Z, 3) < maxZ)
-            //        moldBases.Add(mm);
-            //}
-
             List<MoldBaseModel> eiector = new List<MoldBaseModel>();
-            if (spacer[0].DisPt.X > spacer[0].DisPt.Y)
+            if (moldBases.Count > 0)
             {
-                double max = moldBases.Max(a => a.DisPt.X);
-                eiector = moldBases.FindAll(a => a.DisPt.X == max).ToList();
-            }
-            else
-            {
-                double max = moldBases.Max(a => a.DisPt.Y);
-                eiector = moldBases.FindAll(a => a.DisPt.Y == max).ToList();
+                if (spacer[0].DisPt.X > spacer[0].DisPt.Y)
+                {
+                    double max = moldBases.Max(a => a.DisPt.X);
+                    eiector = moldBases.FindAll(a => a.DisPt.X == max).ToList();
+                }
+                else
+                {
+                    double max = moldBases.Max(a => a.DisPt.Y);
+                    eiector = moldBases.FindAll(a => a.DisPt.Y == max).ToList();
+                }
             }
             return eiector;
         }

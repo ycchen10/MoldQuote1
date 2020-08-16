@@ -67,10 +67,6 @@ namespace MoldQuote
         private NXOpen.BlockStyler.BodyCollector bodySelectB;// Block type: Body Collector
         private NXOpen.BlockStyler.Label label01;// Block type: Label
         private NXOpen.BlockStyler.Button buttonOk;// Block type: Button
-        private NXOpen.BlockStyler.Group group3;// Block type: Group
-        private NXOpen.BlockStyler.StringBlock stringName;// Block type: String
-        private NXOpen.BlockStyler.BodyCollector seleBody;// Block type: Body Collector
-        private NXOpen.BlockStyler.Button buttonOk1;// Block type: Button
         private NXOpen.BlockStyler.Group group1;// Block type: Group
         private NXOpen.BlockStyler.Tree treeInfo;// Block type: Tree Control
         private NXOpen.BlockStyler.Group group2;// Block type: Group
@@ -242,16 +238,11 @@ namespace MoldQuote
                 bodySelectB = (NXOpen.BlockStyler.BodyCollector)theDialog.TopBlock.FindBlock("bodySelectB");
                 label01 = (NXOpen.BlockStyler.Label)theDialog.TopBlock.FindBlock("label01");
                 buttonOk = (NXOpen.BlockStyler.Button)theDialog.TopBlock.FindBlock("buttonOk");
-                group3 = (NXOpen.BlockStyler.Group)theDialog.TopBlock.FindBlock("group3");
-                stringName = (NXOpen.BlockStyler.StringBlock)theDialog.TopBlock.FindBlock("stringName");
-                seleBody = (NXOpen.BlockStyler.BodyCollector)theDialog.TopBlock.FindBlock("seleBody");
-                buttonOk1 = (NXOpen.BlockStyler.Button)theDialog.TopBlock.FindBlock("buttonOk1");
                 group1 = (NXOpen.BlockStyler.Group)theDialog.TopBlock.FindBlock("group1");
                 treeInfo = (NXOpen.BlockStyler.Tree)theDialog.TopBlock.FindBlock("treeInfo");
                 group2 = (NXOpen.BlockStyler.Group)theDialog.TopBlock.FindBlock("group2");
                 strType = (NXOpen.BlockStyler.StringBlock)theDialog.TopBlock.FindBlock("strType");
                 mulMessage = (NXOpen.BlockStyler.MultilineString)theDialog.TopBlock.FindBlock("mulMessage");
-                //------------------------------------------------------------------------------
                 //Registration of Treelist specific callbacks
                 //------------------------------------------------------------------------------
                 //treeInfo.SetOnExpandHandler(new NXOpen.BlockStyler.Tree.OnExpandCallback(OnExpandCallback));
@@ -297,6 +288,14 @@ namespace MoldQuote
                 //treeInfo.SetOnDefaultActionHandler(new NXOpen.BlockStyler.Tree.OnDefaultActionCallback(OnDefaultActionCallback));
 
                 //------------------------------------------------------------------------------
+                //------------------------------------------------------------------------------
+                //Registration of ListBox specific callbacks
+                //------------------------------------------------------------------------------
+                //listBoxType.SetAddHandler(new NXOpen.BlockStyler.ListBox.AddCallback(AddCallback));
+
+                //listBoxType.SetDeleteHandler(new NXOpen.BlockStyler.ListBox.DeleteCallback(DeleteCallback));
+
+                //------------------------------------------------------------------------------
             }
             catch (Exception ex)
             {
@@ -323,11 +322,8 @@ namespace MoldQuote
 
                 this.strType.SetListItems(GetBatFile(machNamePath).ToArray());
                 this.strType1.SetListItems(GetBatFile(typeath).ToArray());
-                this.stringName.SetListItems(moldName.ToArray());
                 SetImage();
-
                 SetMaceMessge();
-                this.buttonOk1.Enable = false;
             }
             catch (Exception ex)
             {
@@ -360,6 +356,7 @@ namespace MoldQuote
                     }
                     CallProcessIpc.NxToErpQuote(SendMessge());
                 }
+
 
             }
             catch (Exception ex)
@@ -414,36 +411,11 @@ namespace MoldQuote
                     AnalysisMold ana = new AnalysisMold(aBody, bBody);
                     if (this.strType1.Value.Contains("细水口"))
                         baseName = new PinPointGateSystem(ana);
-                    else if (this.strType1.Value.Contains("大水口"))
+                    if (this.strType1.Value.Contains("大水口"))
                         baseName = new EdgeGateSystem(ana);
                     else
                         baseName = new EdgeGateSystem(ana);
                     SetTreeInfo();
-                }
-                else if (block == stringName)
-                {
-                    //---------Enter your code here-----------
-                }
-                else if (block == seleBody)
-                {
-                    //---------Enter your code here-----------
-                    if(seleBody.GetSelectedObjects().Length>0)
-                    {
-                        buttonOk1.Enable = true;
-                    }
-                }
-                else if (block == buttonOk1)
-                {
-                    //---------Enter your code here-----------
-                    if(seleBody.GetSelectedObjects().Length>0)
-                    {
-                        this.standard.Clear();
-                        this.infos.Clear();
-                        DeleteAllNode();
-                        baseName.AddMoldBody(seleBody.GetSelectedObjects()[0] as Body, this.stringName.Value);
-                        SetTreeInfo();
-                       // seleBody.SetSelectedObjects(null);
-                    }
                 }
                 else if (block == strType)
                 {
@@ -528,21 +500,6 @@ namespace MoldQuote
                     this.seleInfo.Add(mn);
                     mn.Highlight(true);
                 }
-                else
-                {
-                    foreach (Body by in workPart.Bodies)
-                    {
-                        by.Unblank();
-                    }
-                }
-            }
-            if(tree.GetSelectedNodes().Length==0)
-            {
-
-                foreach (Body by in workPart.Bodies)
-                {
-                    by.Unblank();
-                }
             }
         }
 
@@ -589,10 +546,12 @@ namespace MoldQuote
                 return Tree.ControlType.ComboBox;
             }
             return Tree.ControlType.None;
+
         }
 
         public void OnMenuCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
         {
+
             TreeListMenu eleMenu = this.treeInfo.CreateMenu();
             eleMenu.AddMenuItem(0, "删除", "delete");
             this.treeInfo.SetMenu(eleMenu);
@@ -605,6 +564,7 @@ namespace MoldQuote
                 DeleNode(node);
                 this.treeInfo.DeleteNode(node);
             }
+
         }
 
         //public Node.DropType IsDropAllowedCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID, NXOpen.BlockStyler.Node targetNode, int targetColumnID)
@@ -625,8 +585,21 @@ namespace MoldQuote
 
         //public void OnDefaultActionCallback(NXOpen.BlockStyler.Tree tree, NXOpen.BlockStyler.Node node, int columnID)
         //{
+        //    this.OnBeginLabelEditCallback(tree, node, columnID);
         //}
 
+        //------------------------------------------------------------------------------
+        //ListBox specific callbacks
+        //------------------------------------------------------------------------------
+        //public int  AddCallback (NXOpen.BlockStyler.ListBox list_box)
+        //{
+        //}
+
+        //public int  DeleteCallback(NXOpen.BlockStyler.ListBox list_box)
+        //{
+        //}
+
+        //------------------------------------------------------------------------------
 
         //------------------------------------------------------------------------------
         //Function Name: GetBlockProperties
@@ -668,7 +641,7 @@ namespace MoldQuote
             if (this.baseName != null)
             {
                 infos.AddRange(this.baseName.GetBaseInfo());
-                List<StandardPartsName> bolt = this.baseName.GetBolt();
+                List<StandardPartsName> bolt = this.baseName.GetBolt();              
                 standard.AddRange(this.baseName.GetGuideBushing());
                 standard.AddRange(this.baseName.GetGuidePillar());
                 standard.AddRange(bolt);
@@ -746,9 +719,9 @@ namespace MoldQuote
                 }
             }
         }
-        /// <summary>
-        ///删除全部信息
-        /// </summary>
+       /// <summary>
+       ///删除全部信息
+       /// </summary>
         public void DeleteAllNode()
         {
             List<Node> pro = new List<Node>();
@@ -891,5 +864,3 @@ namespace MoldQuote
         }
     }
 }
-
-

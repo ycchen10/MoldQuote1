@@ -31,21 +31,24 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NXOpen, Version=11.0.2.7, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="NXOpen, Version=8.5.0.23, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\123\managed\NXOpen.dll</HintPath>
+      <HintPath>..\..\Managed\NXOpen.dll</HintPath>
     </Reference>
-    <Reference Include="NXOpen.UF, Version=11.0.2.7, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="NXOpen.Guide">
+      <HintPath>..\..\Managed\NXOpen.Guide.dll</HintPath>
+    </Reference>
+    <Reference Include="NXOpen.UF, Version=8.5.0.23, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\123\managed\NXOpen.UF.dll</HintPath>
+      <HintPath>..\..\Managed\NXOpen.UF.dll</HintPath>
     </Reference>
     <Reference Include="NXOpen.Utilities, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\123\managed\NXOpen.Utilities.dll</HintPath>
+      <HintPath>..\..\Managed\NXOpen.Utilities.dll</HintPath>
     </Reference>
-    <Reference Include="NXOpenUI, Version=11.0.2.7, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="NXOpenUI, Version=8.5.0.23, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\123\managed\NXOpenUI.dll</HintPath>
+      <HintPath>..\..\Managed\NXOpenUI.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -98,8 +101,6 @@
       <Name>MoldQuote.Model</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="123\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

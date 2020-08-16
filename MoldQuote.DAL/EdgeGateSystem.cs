@@ -141,11 +141,7 @@ namespace MoldQuote.DAL
             List<AbstractCylinderBody> pillar = this.cylinderBody.FindAll(a => a.Radius >= 7 && a.IsGuidePillar());
             foreach (AbstractCylinderBody ab in pin)
             {
-                AbstractCylinderBody pi = pillar.Find(a => UMathUtils.IsEqual(a.StratPt.X, ab.StratPt.X) && UMathUtils.IsEqual(a.StratPt.Y, ab.StratPt.Y));
-                //if (!pillars.Exists(a => a.Equals(pi)))
-                //{
-                //    pillars.Add(pi);
-                //}
+                AbstractCylinderBody pi = pillar.Find(a => UMathUtils.IsEqual(a.StratPt.X, ab.StratPt.X) && UMathUtils.IsEqual(a.StratPt.Y, ab.StratPt.Y));             
                 if (pi != null)
                 {
                     pi.Name = "导柱";
@@ -214,7 +210,6 @@ namespace MoldQuote.DAL
                 else
                 {                   
                     this.UpBaseplate = up[up.Count - 1];
-
                     this.UpBaseplate.Name = "面板";
 
                 }
