@@ -21,9 +21,13 @@ namespace MoldQuote.DAL
         {
             get
             {
+                double intse = this.GetInserHost();
+                if (intse != 99999)
+                    return intse;
                 double length = this.Builder.CylFeater.Max(a => a.Length);
                 return this.Builder.CylFeater.Find(a => UMathUtils.IsEqual(a.Length, length)).Radius;
             }
+          
         }
 
         public CylinderManyStepBody(StepBuilder builder) : base(builder)

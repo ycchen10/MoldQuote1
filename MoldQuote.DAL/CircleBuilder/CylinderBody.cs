@@ -18,7 +18,15 @@ namespace MoldQuote.DAL
         /// </summary>
         public override double Radius
         {
-            get { return Builder.CylFeater[0].Radius; }
+            get
+            {
+                double intse = this.GetInserHost();
+                if (intse != 99999)
+                    return intse;
+                else
+                    return Builder.CylFeater[0].Radius;
+            }
+
         }
 
         public CylinderBody(StepBuilder builder) : base(builder)

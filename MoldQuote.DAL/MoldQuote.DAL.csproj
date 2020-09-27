@@ -31,14 +31,15 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NXOpen, Version=8.5.0.23, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="NXOpen, Version=11.0.2.7, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Managed\NXOpen.dll</HintPath>
     </Reference>
-    <Reference Include="NXOpen.Guide">
+    <Reference Include="NXOpen.Guide, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Managed\NXOpen.Guide.dll</HintPath>
     </Reference>
-    <Reference Include="NXOpen.UF, Version=8.5.0.23, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="NXOpen.UF, Version=11.0.2.7, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Managed\NXOpen.UF.dll</HintPath>
     </Reference>
@@ -46,7 +47,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Managed\NXOpen.Utilities.dll</HintPath>
     </Reference>
-    <Reference Include="NXOpenUI, Version=8.5.0.23, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="NXOpenUI, Version=11.0.2.7, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Managed\NXOpenUI.dll</HintPath>
     </Reference>

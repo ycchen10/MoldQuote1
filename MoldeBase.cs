@@ -412,9 +412,9 @@ namespace MoldQuote
                     Body aBody = bodySelectA.GetSelectedObjects()[0] as Body;
                     Body bBody = bodySelectB.GetSelectedObjects()[0] as Body;
                     AnalysisMold ana = new AnalysisMold(aBody, bBody);
-                    if (this.strType1.Value.Contains("细水口"))
+                    if (this.strType1.WideValue.Contains("细水口"))
                         baseName = new PinPointGateSystem(ana);
-                    else if (this.strType1.Value.Contains("大水口"))
+                    else if (this.strType1.WideValue.Contains("大水口"))
                         baseName = new EdgeGateSystem(ana);
                     else
                         baseName = new EdgeGateSystem(ana);
@@ -427,7 +427,7 @@ namespace MoldQuote
                 else if (block == seleBody)
                 {
                     //---------Enter your code here-----------
-                    if(seleBody.GetSelectedObjects().Length>0)
+                    if (seleBody.GetSelectedObjects().Length > 0)
                     {
                         buttonOk1.Enable = true;
                     }
@@ -435,14 +435,14 @@ namespace MoldQuote
                 else if (block == buttonOk1)
                 {
                     //---------Enter your code here-----------
-                    if(seleBody.GetSelectedObjects().Length>0)
+                    if (seleBody.GetSelectedObjects().Length > 0)
                     {
                         this.standard.Clear();
                         this.infos.Clear();
                         DeleteAllNode();
-                        baseName.AddMoldBody(seleBody.GetSelectedObjects()[0] as Body, this.stringName.Value);
+                        baseName.AddMoldBody(seleBody.GetSelectedObjects()[0] as Body, this.stringName.WideValue);
                         SetTreeInfo();
-                       // seleBody.SetSelectedObjects(null);
+                        // seleBody.SetSelectedObjects(null);
                     }
                 }
                 else if (block == strType)
@@ -536,7 +536,7 @@ namespace MoldQuote
                     }
                 }
             }
-            if(tree.GetSelectedNodes().Length==0)
+            if (tree.GetSelectedNodes().Length == 0)
             {
 
                 foreach (Body by in workPart.Bodies)
@@ -776,7 +776,7 @@ namespace MoldQuote
         private void SetImage()
         {
             string pngPath = dllPath.Replace("application\\", "Image\\");
-            string type = this.strType1.Value;
+            string type = this.strType1.WideValue;
             if (type != null && type != "")
             {
                 string tmpe = pngPath + type.Substring(0, type.IndexOf("-")) + ".bmp";
@@ -793,7 +793,7 @@ namespace MoldQuote
 
         private void SetMaceMessge()
         {
-            string[] str = { this.strType.Value };
+            string[] str = { this.strType.WideValue };
             this.mulMessage.SetValue(str);
         }
 
@@ -835,7 +835,7 @@ namespace MoldQuote
         /// <returns></returns>
         private string SendMessge()
         {
-            string dataString = "{" + strType1.Value.Substring(0, strType1.Value.IndexOf("-")) + ",";
+            string dataString = "{" + strType1.WideValue.Substring(0, strType1.WideValue.IndexOf("-")) + ",";
             MoldQuoteNameInfo aInfo = this.infos.Find(a => a.Name.Equals("A板"));
             MoldQuoteNameInfo bInfo = this.infos.Find(a => a.Name.Equals("B板"));
             MoldQuoteNameInfo fangt = this.infos.Find(a => a.Name.Equals("方铁"));

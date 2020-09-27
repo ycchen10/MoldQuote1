@@ -17,7 +17,7 @@ namespace MoldQuote.DAL
         /// <summary>
         /// 台阶数
         /// </summary>
-        public double Count
+        public int Count
         {
             get { return this.Builder.CylFeater.Count; }
         }
@@ -47,7 +47,7 @@ namespace MoldQuote.DAL
             string temp = "";
             foreach (CylinderFeater cf in this.Builder.CylFeater)
             {
-                temp += "D" + (cf.Radius * 2).ToString("f3") +"H"+ cf.Length.ToString("f3");
+                temp += "D" + (cf.Radius * 2).ToString("f3") + "H" + cf.Length.ToString("f3");
             }
             return temp;
         }

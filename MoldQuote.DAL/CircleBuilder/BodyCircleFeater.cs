@@ -30,7 +30,7 @@ namespace MoldQuote.DAL
         /// <summary>
         /// 获取孔特征
         /// </summary>
-        private void GetHoleBuilder()
+        public List<HoleBuilder> GetHoleBuilder()
         {
 
             if (holeBuilders.Count == 0)
@@ -41,13 +41,15 @@ namespace MoldQuote.DAL
                     if (cl.IsCylinder())
                         holeBuilders.Add(new HoleBuilder(cl));
                 }
+                return holeBuilders;
             }
+            return new List<HoleBuilder>();
         }
 
         /// <summary>
         /// 获取圆柱特征
         /// </summary>
-        private void GetStepBuilder()
+        public void GetStepBuilder()
         {
 
             if (holeBuilders.Count == 0)

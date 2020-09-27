@@ -18,6 +18,7 @@ namespace MoldQuote.DAL
         private Body bBody;
         public Matrix4 Matr { get; private set; } = new Matrix4();
         private Part workPart;
+        private CartesianCoordinateSystem csys;
         /// <summary>
         /// 上模
         /// </summary>
@@ -40,10 +41,12 @@ namespace MoldQuote.DAL
             this.bBody = bBody;
             workPart = Session.GetSession().Parts.Work;
             this.Matr = GetMatr();
-            MoldBaseModel aMold = new MoldBaseModel(aBody, Matr);
+            Matrix4 inv = this.Matr.GetInversMatrix();
+            csys = BoundingBoxUtils.CreateCoordinateSystem(this.Matr, inv);
+            MoldBaseModel aMold = new MoldBaseModel(aBody, Matr, csys);
             aMold.Name = "A板";
             this.AMoldBase = aMold;
-            MoldBaseModel bMold = new MoldBaseModel(bBody, Matr);
+            MoldBaseModel bMold = new MoldBaseModel(bBody, Matr, csys);
             bMold.Name = "B板";
             this.BMoldBase = bMold;
         }
@@ -58,8 +61,9 @@ namespace MoldQuote.DAL
             mat.Identity();
             mat.TransformToCsys(wcs, ref mat);
             Matrix4 inv = mat.GetInversMatrix();
-            MoldBaseModel aMold = new MoldBaseModel(aBody, mat);
-            MoldBaseModel bMold = new MoldBaseModel(bBody, mat);
+            CartesianCoordinateSystem cs = BoundingBoxUtils.CreateCoordinateSystem(mat, inv);
+            MoldBaseModel aMold = new MoldBaseModel(aBody, mat, cs);
+            MoldBaseModel bMold = new MoldBaseModel(bBody, mat, cs);
             Vector3d vec = UMathUtils.GetVector(bMold.CenterPt, aMold.CenterPt);
             Point3d center = UMathUtils.GetMiddle(bMold.CenterPt, aMold.CenterPt);
             inv.ApplyPos(ref center);
@@ -74,9 +78,10 @@ namespace MoldQuote.DAL
         {
             moldBase = new List<MoldBaseModel>();
             cylinder = new List<AbstractCylinderBody>();
+
             foreach (Body by in workPart.Bodies)
             {
-                MoldBaseModel mm = new MoldBaseModel(by, this.Matr);
+                MoldBaseModel mm = new MoldBaseModel(by, this.Matr, csys);
                 if ((UMathUtils.IsEqual(mm.CenterPt.X, 0) && UMathUtils.IsEqual(mm.CenterPt.Y, 0)) &&
                     ((Math.Round(mm.DisPt.X, 4) >= Math.Round(AMoldBase.DisPt.X, 4) &&
                     Math.Round(mm.DisPt.Y, 4) >= Math.Round(AMoldBase.DisPt.Y, 4))))
@@ -86,16 +91,18 @@ namespace MoldQuote.DAL
                 else
                 {
                     StepBuilder builder;
-                    BodyCircleFeater bf = new BodyCircleFeater(by);
-                    if (bf.IsCylinderBody(out builder))
+                    if (mm.DisPt.Z > mm.DisPt.X && mm.DisPt.Z > mm.DisPt.Y)
                     {
-                        AbstractCylinderBody ab = CylinderBodyFactory.Create(builder);
-
-                        if (ab != null)
+                        BodyCircleFeater bf = new BodyCircleFeater(by);
+                        if (bf.IsCylinderBody(out builder))
                         {
-                            double angle = UMathUtils.Angle(ab.Direction, this.Matr.GetZAxis());
-                            if (UMathUtils.IsEqual(angle, 0) || UMathUtils.IsEqual(angle, Math.PI))
-                                cylinder.Add(ab);
+                            AbstractCylinderBody ab = CylinderBodyFactory.Create(builder);
+                            if (ab != null)
+                            {
+                                double angle = UMathUtils.Angle(ab.Direction, this.Matr.GetZAxis());
+                                if (UMathUtils.IsEqual(angle, 0) || UMathUtils.IsEqual(angle, Math.PI))
+                                    cylinder.Add(ab);
+                            }
                         }
                     }
                     else if ((UMathUtils.IsEqual(mm.CenterPt.X, 0) || UMathUtils.IsEqual(mm.CenterPt.Y, 0)) &&

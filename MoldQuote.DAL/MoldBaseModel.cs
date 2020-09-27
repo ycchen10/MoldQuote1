@@ -26,16 +26,15 @@ namespace MoldQuote.DAL
         /// 材质
         /// </summary>
         public string Materials { get; set; }
-        public MoldBaseModel(Body body, Matrix4 mat)
+        public MoldBaseModel(Body body, Matrix4 mat,CartesianCoordinateSystem csys)
         {
             this.Body = body;
             this.matr = mat;
-            Matrix4 inv = mat.GetInversMatrix();
-            CartesianCoordinateSystem cs = BoundingBoxUtils.CreateCoordinateSystem(mat, inv);
+           
             NXObject[] obj = { body };
             Point3d center = new Point3d();
             Point3d dis = new Point3d();
-            BoundingBoxUtils.GetBoundingBoxInLocal(obj, cs, mat, ref center, ref dis);
+            BoundingBoxUtils.GetBoundingBoxInLocal(obj, csys, mat, ref center, ref dis);
             this.CenterPt = center;
             this.DisPt = dis;
             this.Materials = "王牌";
@@ -103,7 +102,7 @@ namespace MoldQuote.DAL
             List<AbstractCylinderBody> bush = new List<AbstractCylinderBody>();
             foreach (AbstractCylinderBody ab in cylinder)
             {
-                if (ab.Radius >= 8)
+                if (ab.Radius >= 6)
                 {
                     Vector3d vec1 = ab.Direction;
                     Vector3d vec2 = new Vector3d(-vec1.X, -vec1.Y, -vec1.Z);
@@ -117,12 +116,12 @@ namespace MoldQuote.DAL
                         {
                             if (ab is CylinderBody)
                             {
-                                ab.Name = "直导套";
+                                ab.Name = "直司";
                             }
                             else
                             {
-                                ab.Name = "有托导套";
-                            }
+                                ab.Name = "托司";
+                            }                      
                             bush.Add(ab);
                             continue;
                         }

@@ -158,5 +158,25 @@ namespace MoldQuote.DAL
             }
             return false;
         }
+
+        public double GetInserHost()
+        {
+            double min = 99999;
+            foreach (Face fc in this.Body.GetFaces())
+            {
+                {
+                    if (fc.SolidFaceType ==Face.FaceType.Cylindrical)
+                    {
+                        FaceData da = FaceUtils.AskFaceData(fc);
+                        if (da.IntNorm == -1)
+                        {
+                            if (min > da.Radius)
+                                min = da.Radius;
+                        }
+                    }
+                }
+            }
+            return min;
+        }
     }
 }

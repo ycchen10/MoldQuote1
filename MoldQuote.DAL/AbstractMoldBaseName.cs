@@ -88,12 +88,12 @@ namespace MoldQuote.DAL
                     this.SupportPlate = down[0];
                     this.SupportPlate.Name = "托板";
                 }
-                if(down.Count>1)
+                if (down.Count > 1)
                 {
                     this.Baseplate = down[down.Count - 1];
                     this.Baseplate.Name = "底板";
                 }
-             
+
                 MoldBaseModel kon = this.analysis.GetKnockoutPlate(this.moldbase);
                 if (kon != null)
                 {
@@ -228,17 +228,19 @@ namespace MoldQuote.DAL
         /// </summary>
         /// <param name="body"></param>
         /// <returns></returns>
-        public bool AddMoldBody(Body body,string name)
+        public bool AddMoldBody(Body body, string name)
         {
             StepBuilder builder;
             BodyCircleFeater bf = new BodyCircleFeater(body);
+            Matrix4 inv = this.analysis.Matr.GetInversMatrix();
+            CartesianCoordinateSystem csys = BoundingBoxUtils.CreateCoordinateSystem(this.analysis.Matr, inv);
             if (bf.IsCylinderBody(out builder))
             {
                 return false;
             }
             else
             {
-                MoldBaseModel mold = new MoldBaseModel(body, this.analysis.Matr);
+                MoldBaseModel mold = new MoldBaseModel(body, this.analysis.Matr, csys);
                 mold.Name = name;
                 this.OtherBaseModel.Add(mold);
                 return true;
